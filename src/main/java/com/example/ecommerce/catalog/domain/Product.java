@@ -1,36 +1,62 @@
 package com.example.ecommerce.catalog.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "products")
 public class Product {
-
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Getter
+    @NotBlank
+    @Column(nullable = false)
     private String productName;
-    @Getter
+
+    @Column(length = 20000)
     private String description;
-    @Getter
+
+    @NotBlank
+    @Column(nullable = false)
     private String brandName;
 
-    @Column(precision = 10, scale = 2) // e.g., 99999999.99 max
-    @Getter
-    private BigDecimal price;
+    @DecimalMin(value = "0.0", inclusive = true)
+    @Digits(integer = 2, fraction = 2)
+    @Column(precision = 4, scale = 2)
+    private BigDecimal rating = BigDecimal.ONE;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
+    @Min(0)
+    @Column(nullable = false)
+    private long stockQuantity = 0;
+
+    @DecimalMin(value = "0.00", inclusive = false)
+    @Digits(integer = 10, fraction = 2)
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal weight;
+
+    @DecimalMin(value = "0.00", inclusive = false)
+    @Digits(integer = 10, fraction = 2)
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price = BigDecimal.ZERO;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     protected Product() {
@@ -38,9 +64,12 @@ public class Product {
 
     private Product(Builder builder) {
         this.productName = builder.productName;
-        this.brandName = builder.brandName;
-        this.price = builder.price;
         this.description = builder.description;
+        this.brandName = builder.brandName;
+        this.rating = builder.rating != null ? builder.rating : BigDecimal.ZERO;
+        this.stockQuantity = builder.stockQuantity;
+        this.price = builder.price;
+        this.weight = builder.weight;
         this.category = builder.category;
     }
 
@@ -49,6 +78,9 @@ public class Product {
         private String productName;
         private String description;
         private String brandName;
+        private BigDecimal rating;
+        private long stockQuantity;
+        private BigDecimal weight;
         private BigDecimal price;
         private Category category;
 
@@ -67,6 +99,21 @@ public class Product {
             return this;
         }
 
+        public Builder rating(BigDecimal rating) {
+            this.rating = rating;
+            return this;
+        }
+
+        public Builder stockQuantity(long stockQuantity) {
+            this.stockQuantity = stockQuantity;
+            return this;
+        }
+
+        public Builder weight(BigDecimal weight) {
+            this.weight = weight;
+            return this;
+        }
+
         public Builder price(BigDecimal price) {
             this.price = price;
             return this;
@@ -82,9 +129,10 @@ public class Product {
         }
     }
 
+    // --- JPA Lifecycle Hooks ---
     @PrePersist
     protected void onCreate() {
-        LocalDateTime createdAt = LocalDateTime.now();
+        createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 

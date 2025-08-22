@@ -1,9 +1,13 @@
 package com.example.ecommerce.catalog.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "categories")
 public class Category {
@@ -11,21 +15,60 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private String categoryName;
-    private String slug;
+    @NotBlank
+    @Column(nullable = false, unique = true)
+    private String name;
+
     private String description;
 
-    // Self-referencing relationship for hierarchy
-    private UUID parentId;
-    private String imageUrl;
-    private boolean isActive;
-    private long sortOrder;
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "parent_id")
+    private Category parent;
 
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    protected Category() {
+    }
+
+    private Category(Builder builder) {
+        this.name = builder.name;
+        this.description = builder.description;
+        this.parent = builder.parent;
+    }
+
+    // --- Builder ---
+    public static class Builder {
+        private String name;
+        private String description;
+        private Category parent;
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder parent(Category parent) {
+            this.parent = parent;
+            return this;
+        }
+
+        public Category build() {
+            return new Category(this);
+        }
+    }
 
     @PrePersist
     protected void onCreate() {
-        LocalDateTime createdAt = LocalDateTime.now();
+        createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
