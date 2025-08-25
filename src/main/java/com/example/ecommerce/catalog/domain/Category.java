@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -19,11 +21,18 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Column(length = 500)
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "parent_id")
     private Category parent;
+
+    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Category> subCategories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    private final List<Product> products = new ArrayList<>();
 
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;

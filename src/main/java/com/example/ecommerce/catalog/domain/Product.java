@@ -53,6 +53,10 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "product_image_id", nullable = false)
+    private ProductImage productImage;
+
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
@@ -71,6 +75,7 @@ public class Product {
         this.price = builder.price;
         this.weight = builder.weight;
         this.category = builder.category;
+        this.productImage = builder.productImage;
     }
 
     // --- Builder ---
@@ -83,6 +88,7 @@ public class Product {
         private BigDecimal weight;
         private BigDecimal price;
         private Category category;
+        private ProductImage productImage;
 
         public Builder productName(String productName) {
             this.productName = productName;
@@ -121,6 +127,11 @@ public class Product {
 
         public Builder category(Category category) {
             this.category = category;
+            return this;
+        }
+
+        public Builder productImage(ProductImage productImage) {
+            this.productImage = productImage;
             return this;
         }
 
