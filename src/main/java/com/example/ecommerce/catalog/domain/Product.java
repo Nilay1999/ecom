@@ -1,5 +1,6 @@
 package com.example.ecommerce.catalog.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
@@ -9,6 +10,9 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Getter
@@ -51,11 +55,27 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
+    @JsonIgnore
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "product_image_id", nullable = false)
-    private ProductImage productImage;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImage> productImages = new ArrayList<>();
+
+    public void addImage(ProductImage image) {
+        productImages.add(image);
+        image.setProduct(this);
+    }
+
+    public void removeImage(ProductImage image) {
+        productImages.remove(image);
+        image.setProduct(null);
+    }
+
+    public Optional<ProductImage> getPrimaryImage() {
+        return productImages.stream()
+                .filter(ProductImage::isPrimary)
+                .findFirst();
+    }
 
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
@@ -75,7 +95,6 @@ public class Product {
         this.price = builder.price;
         this.weight = builder.weight;
         this.category = builder.category;
-        this.productImage = builder.productImage;
     }
 
     // --- Builder ---
@@ -88,7 +107,6 @@ public class Product {
         private BigDecimal weight;
         private BigDecimal price;
         private Category category;
-        private ProductImage productImage;
 
         public Builder productName(String productName) {
             this.productName = productName;
@@ -127,11 +145,6 @@ public class Product {
 
         public Builder category(Category category) {
             this.category = category;
-            return this;
-        }
-
-        public Builder productImage(ProductImage productImage) {
-            this.productImage = productImage;
             return this;
         }
 

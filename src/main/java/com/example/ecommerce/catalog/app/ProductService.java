@@ -2,8 +2,11 @@ package com.example.ecommerce.catalog.app;
 
 import com.example.ecommerce.catalog.domain.Category;
 import com.example.ecommerce.catalog.domain.Product;
+import com.example.ecommerce.catalog.domain.ProductImage;
 import com.example.ecommerce.catalog.infra.CategoryRepository;
 import com.example.ecommerce.catalog.infra.ProductRepository;
+import com.example.ecommerce.catalog.web.dto.product.CreateProductResponseDTO;
+import com.example.ecommerce.catalog.web.dto.product.ProductImagePayload;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,8 +23,9 @@ public class ProductService {
         this.categoryRepo = categoryRepo;
     }
 
-    public Product create(String name, String description, BigDecimal price, String brand, BigDecimal weight,
-            UUID categoryId) {
+    public CreateProductResponseDTO create(String name, String description, BigDecimal price, String brand,
+            BigDecimal weight, UUID categoryId, List<ProductImagePayload> productImagelist) {
+
         Category category = categoryRepo.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
 
@@ -32,7 +36,32 @@ public class ProductService {
                 .weight(weight)
                 .category(category)
                 .build();
-        return productRepo.save(product);
+        for (ProductImagePayload image : productImagelist) {
+            product.addImage(new ProductImage(image.getImageUrl(), image.isPrimary(), product));
+        }
+        productRepo.save(product);
+        return new CreateProductResponseDTO(product.getId(), product.getBrandName(), product.getDescription(),
+                                            product.getPrice(), product.getWeight(), product.getStockQuantity(),
+                                            product.getCategory(), product.getProductImages());
+    }
+
+    public CreateProductResponseDTO create(String name, String description, BigDecimal price, String brand,
+            BigDecimal weight, UUID categoryId) {
+        Category category = categoryRepo.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+
+        Product product = new Product.Builder().productName(name)
+                .description(description)
+                .brandName(brand)
+                .price(price)
+                .weight(weight)
+                .category(category)
+                .build();
+        productRepo.save(product);
+
+        return new CreateProductResponseDTO(product.getId(), product.getBrandName(), product.getDescription(),
+                                            product.getPrice(), product.getWeight(), product.getStockQuantity(),
+                                            product.getCategory());
     }
 
     public List<Product> findByPriceRange(BigDecimal min, BigDecimal max) {
