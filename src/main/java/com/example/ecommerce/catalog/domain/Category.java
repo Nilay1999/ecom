@@ -33,8 +33,11 @@ public class Category {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Category> subCategories = new ArrayList<>();
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
     private final List<Product> products = new ArrayList<>();
+
+    @Column(length = 200, unique = true, nullable = false)
+    private String slug;
 
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;

@@ -17,7 +17,8 @@ import java.util.UUID;
 
 @Getter
 @Entity
-@Table(name = "products")
+@Table(name = "products", indexes = {@Index(name = "idx_product_name", columnList = "productName"), @Index(name =
+        "idx_brand_name", columnList = "brandName")})
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -34,9 +35,8 @@ public class Product {
     @Column(nullable = false)
     private String brandName;
 
-    @DecimalMin(value = "0.0", inclusive = true)
-    @Digits(integer = 2, fraction = 2)
-    @Column(precision = 4, scale = 2)
+    @Digits(integer = 1, fraction = 2)
+    @Column(precision = 3, scale = 2)
     private BigDecimal rating = BigDecimal.ONE;
 
     @Min(0)
@@ -57,6 +57,14 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     @JsonIgnore
     private Category category;
+
+    public enum Status {
+        ACTIVE, IN_ACTIVE, OUT_OF_STOCK
+    }
+
+    @Column(name = "status", length = 25, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.OUT_OF_STOCK;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> productImages = new ArrayList<>();
@@ -95,6 +103,7 @@ public class Product {
         this.price = builder.price;
         this.weight = builder.weight;
         this.category = builder.category;
+        this.status = builder.status;
     }
 
     // --- Builder ---
@@ -107,6 +116,7 @@ public class Product {
         private BigDecimal weight;
         private BigDecimal price;
         private Category category;
+        private Status status;
 
         public Builder productName(String productName) {
             this.productName = productName;
@@ -145,6 +155,11 @@ public class Product {
 
         public Builder category(Category category) {
             this.category = category;
+            return this;
+        }
+
+        public Builder status(Status status) {
+            this.status = status;
             return this;
         }
 
