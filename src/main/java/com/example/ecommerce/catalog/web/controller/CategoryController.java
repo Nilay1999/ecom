@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/category")
 public class CategoryController {
-    private final CategoryService svc;
+    private final CategoryService categoryService;
 
-    public CategoryController(CategoryService svc) {
-        this.svc = svc;
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
     }
 
     @PostMapping
     public Category create(@RequestBody CreateCategoryRequest request) {
-        return svc.create(request.getCategoryName(), request.getDescription());
+        return categoryService.create(request.getCategoryName(), request.getDescription());
     }
 }

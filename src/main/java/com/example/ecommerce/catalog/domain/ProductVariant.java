@@ -22,6 +22,9 @@ public class ProductVariant {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Column(nullable = false)
+    private String variantName;
+
     @DecimalMin(value = "0.00", inclusive = false)
     @Digits(integer = 10, fraction = 2)
     @Column(nullable = false, precision = 10, scale = 2)

@@ -7,6 +7,10 @@ import com.example.ecommerce.catalog.infra.CategoryRepository;
 import com.example.ecommerce.catalog.infra.ProductRepository;
 import com.example.ecommerce.catalog.web.dto.product.CreateProductResponseDTO;
 import com.example.ecommerce.catalog.web.dto.product.ProductImagePayload;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -62,6 +66,15 @@ public class ProductService {
         return new CreateProductResponseDTO(product.getId(), product.getBrandName(), product.getDescription(),
                                             product.getPrice(), product.getWeight(), product.getStockQuantity(),
                                             product.getCategory());
+    }
+
+    public Page<Product> getPaginatedProducts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepo.findAll(pageable);
+    }
+
+    public Product getProductById(UUID id) {
+        return productRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found"));
     }
 
     public List<Product> findByPriceRange(BigDecimal min, BigDecimal max) {

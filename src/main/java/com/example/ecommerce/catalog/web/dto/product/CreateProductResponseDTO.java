@@ -23,7 +23,6 @@ public class CreateProductResponseDTO {
     public record ProductImageRes(String imageUrl, boolean isPrimary) {
     }
 
-
     public CreateProductResponseDTO(UUID id, String brandName, String description, BigDecimal price, BigDecimal weight,
             long stockQuantity, Category category, List<ProductImage> productImages) {
         this.id = id;

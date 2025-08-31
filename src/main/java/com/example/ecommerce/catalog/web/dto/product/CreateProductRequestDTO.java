@@ -34,5 +34,6 @@ public class CreateProductRequestDTO {
     @NotNull
     private UUID categoryId;
 
+    @NotEmpty
     private List<ProductImagePayload> productImageList;
 }
