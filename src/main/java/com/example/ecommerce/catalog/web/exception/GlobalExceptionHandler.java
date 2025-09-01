@@ -1,5 +1,6 @@
 package com.example.ecommerce.catalog.web.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -25,5 +26,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(errors);
     }
-}
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        Map<String, String> error = new HashMap<>();
+
+        String message = ex.getMessage();
+        if (message != null && message.contains("categories_slug_key")) {
+            error.put("slug", "A category with this slug already exists");
+        } else if (message != null && message.contains("categories_name_key")) {
+            error.put("name", "A category with this name already exists");
+        } else {
+            error.put("error", "Data integrity violation: " + ex.getMostSpecificCause().getMessage());
+        }
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+}

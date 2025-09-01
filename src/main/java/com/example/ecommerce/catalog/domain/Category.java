@@ -52,26 +52,33 @@ public class Category {
         this.name = builder.name;
         this.description = builder.description;
         this.parent = builder.parent;
+        this.slug = builder.slug;
     }
 
     // --- Builder ---
     public static class Builder {
         private String name;
         private String description;
+        private String slug;
         private Category parent;
 
-        public Builder name(String name) {
+        public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder description(String description) {
+        public Builder setDescription(String description) {
             this.description = description;
             return this;
         }
 
-        public Builder parent(Category parent) {
+        public Builder setParent(Category parent) {
             this.parent = parent;
+            return this;
+        }
+
+        public Builder setSlug(String slug) {
+            this.slug = slug;
             return this;
         }
 

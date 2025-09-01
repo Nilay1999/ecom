@@ -29,19 +29,19 @@ public class ProductController {
         if (request.getProductImageList() != null || !request.getProductImageList()
                 .isEmpty()) {
             createdProduct = productService.create(request.getProductName(), request.getDescription(),
-                                                   request.getPrice(), request.getBrandName(), request.getWeight(),
-                                                   request.getCategoryId(), request.getProductImageList());
+                    request.getPrice(), request.getBrandName(), request.getWeight(),
+                    request.getCategoryId(), request.getProductImageList());
         } else {
             createdProduct = productService.create(request.getProductName(), request.getDescription(),
-                                                   request.getPrice(), request.getBrandName(), request.getWeight(),
-                                                   request.getCategoryId());
+                    request.getPrice(), request.getBrandName(), request.getWeight(),
+                    request.getCategoryId());
         }
 
         return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<Page<Product>> getAllProducts(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<Page<Product>> getPaginatedProducts(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         Page<Product> products = productService.getPaginatedProducts(page, size);

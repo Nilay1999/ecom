@@ -10,7 +10,6 @@ import com.example.ecommerce.catalog.web.dto.product.ProductImagePayload;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -38,6 +37,7 @@ public class ProductService {
                 .brandName(brand)
                 .price(price)
                 .weight(weight)
+                .status(Product.Status.OUT_OF_STOCK)
                 .category(category)
                 .build();
         for (ProductImagePayload image : productImagelist) {
@@ -60,6 +60,7 @@ public class ProductService {
                 .price(price)
                 .weight(weight)
                 .category(category)
+                .status(Product.Status.OUT_OF_STOCK)
                 .build();
         productRepo.save(product);
 
@@ -74,7 +75,8 @@ public class ProductService {
     }
 
     public Product getProductById(UUID id) {
-        return productRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        return productRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
     }
 
     public List<Product> findByPriceRange(BigDecimal min, BigDecimal max) {
