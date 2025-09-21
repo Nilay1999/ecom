@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -29,15 +30,21 @@ public class ProductController {
         if (request.getProductImageList() != null || !request.getProductImageList()
                 .isEmpty()) {
             createdProduct = productService.create(request.getProductName(), request.getDescription(),
-                    request.getPrice(), request.getBrandName(), request.getWeight(),
+                    request.getPrice(), request.getBrandName(), request.getWeight(), request.getStockQuantity(),
                     request.getCategoryId(), request.getProductImageList());
         } else {
             createdProduct = productService.create(request.getProductName(), request.getDescription(),
-                    request.getPrice(), request.getBrandName(), request.getWeight(),
+                    request.getPrice(), request.getBrandName(), request.getWeight(), request.getStockQuantity(),
                     request.getCategoryId());
         }
 
         return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/dump")
+    public ResponseEntity<Object> dump() throws IOException, InterruptedException {
+        productService.dumpDummyData();
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping

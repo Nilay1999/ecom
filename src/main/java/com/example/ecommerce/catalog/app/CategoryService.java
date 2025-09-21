@@ -49,8 +49,6 @@ public class CategoryService {
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found with slug: " + slug));
     }
 
-    // -------------------- private helpers --------------------
-
     private Category saveCategory(String name, String description, Category parent) {
         String slug = generateUniqueSlug(name);
         validateCategoryData(name, slug);

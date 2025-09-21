@@ -5,6 +5,13 @@ import lombok.Getter;
 
 @Getter
 public class ProductImagePayload {
+    public ProductImagePayload(String imageUrl, boolean isPrimary) {
+        this.imageUrl = imageUrl;
+        this.isPrimary = isPrimary;
+    }
+
+    public ProductImagePayload () {}
+
     @NotNull
     private String imageUrl;
 
