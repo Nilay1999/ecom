@@ -4,9 +4,15 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
-public class ProductImagePayload {
+public class ProductImageRequestDTO {
+
+    @NotNull(message = "Product ID cannot be null")
+    private UUID productId;
+
     @NotBlank(message = "Image URL cannot be blank")
     @Size(max = 500, message = "Image URL cannot exceed 500 characters")
     @Pattern(regexp = "^https?://.*\\.(jpg|jpeg|png|gif|webp|svg)(\\?.*)?$", message = "Invalid image URL format. Supported formats: jpg, jpeg, png, gif, webp, svg")

@@ -54,20 +54,20 @@
     - Add price override management
     - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 4. Create DTO classes and mapping utilities
-  - [ ] 4.1 Create request DTOs with validation
+- [x] 4. Create DTO classes and mapping utilities
+  - [x] 4.1 Create request DTOs with validation
     - Implement ProductImageRequestDTO with validation annotations
     - Implement ProductVariantRequestDTO with business rules
     - Enhance existing request DTOs with missing fields
     - _Requirements: 4.1, 4.3_
 
-  - [ ] 4.2 Create response DTOs
+  - [x] 4.2 Create response DTOs
     - Implement ProductImageResponseDTO with proper data exposure
     - Implement ProductVariantResponseDTO with calculated fields
     - Enhance existing response DTOs with missing relationships
     - _Requirements: 4.2, 4.4_
 
-  - [ ] 4.3 Create DTO mapping utilities
+  - [x] 4.3 Create DTO mapping utilities
     - Implement mapper classes for entity-DTO conversion
     - Add mapping methods for complex relationships
     - Implement bidirectional mapping support
