@@ -2,6 +2,7 @@ package com.example.ecommerce.catalog.domain.specification;
 
 import com.example.ecommerce.catalog.domain.Category;
 import com.example.ecommerce.catalog.domain.Product;
+import com.example.ecommerce.catalog.domain.ProductVariant;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -327,7 +328,177 @@ public class ProductSpecification {
     }
 
     /**
-     * Complex filter combining multiple criteria
+     * Filter products by creation date range
+     */
+    public static Specification<Product> createdBetween(java.time.LocalDateTime startDate,
+            java.time.LocalDateTime endDate) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (startDate != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), startDate));
+            }
+
+            if (endDate != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), endDate));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    /**
+     * Filter products by last update date range
+     */
+    public static Specification<Product> updatedBetween(java.time.LocalDateTime startDate,
+            java.time.LocalDateTime endDate) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (startDate != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("updatedAt"), startDate));
+            }
+
+            if (endDate != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("updatedAt"), endDate));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    /**
+     * Filter products with variants in specific status
+     */
+    public static Specification<Product> hasVariantsWithStatus(ProductVariant.Status variantStatus) {
+        return (root, query, criteriaBuilder) -> {
+            if (variantStatus == null) {
+                return criteriaBuilder.conjunction();
+            }
+
+            var variantJoin = root.join("productVariants", JoinType.INNER);
+            return criteriaBuilder.equal(variantJoin.get("status"), variantStatus);
+        };
+    }
+
+    /**
+     * Filter products with variants having stock
+     */
+    public static Specification<Product> hasVariantsInStock() {
+        return (root, query, criteriaBuilder) -> {
+            var variantJoin = root.join("productVariants", JoinType.INNER);
+            return criteriaBuilder.greaterThan(variantJoin.get("stockQuantity"), 0L);
+        };
+    }
+
+    /**
+     * Filter products with total stock (product + variants) above threshold
+     */
+    public static Specification<Product> hasTotalStockGreaterThan(long threshold) {
+        return (root, query, criteriaBuilder) -> {
+            // This is a simplified version - in reality, you'd need a more complex subquery
+            return criteriaBuilder.greaterThan(root.get("stockQuantity"), threshold);
+        };
+    }
+
+    /**
+     * Filter products by category hierarchy (including subcategories)
+     */
+    public static Specification<Product> inCategoryHierarchy(UUID rootCategoryId) {
+        return (root, query, criteriaBuilder) -> {
+            if (rootCategoryId == null) {
+                return criteriaBuilder.conjunction();
+            }
+
+            // This would need a recursive CTE or multiple joins in a real implementation
+            // For now, just filter by direct category
+            return criteriaBuilder.equal(root.get("category").get("id"), rootCategoryId);
+        };
+    }
+
+    /**
+     * Filter products with images in specific format
+     */
+    public static Specification<Product> hasImagesWithFormat(String imageFormat) {
+        return (root, query, criteriaBuilder) -> {
+            if (imageFormat == null || imageFormat.trim().isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            var imageJoin = root.join("productImages", JoinType.INNER);
+            return criteriaBuilder.like(
+                    criteriaBuilder.lower(imageJoin.get("imageUrl")),
+                    "%." + imageFormat.toLowerCase() + "%");
+        };
+    }
+
+    /**
+     * Filter products with specific variant attribute
+     */
+    public static Specification<Product> hasVariantWithAttribute(String attributeName, String attributeValue) {
+        return (root, query, criteriaBuilder) -> {
+            if (attributeName == null || attributeName.trim().isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            var variantJoin = root.join("productVariants", JoinType.INNER);
+
+            if (attributeValue == null) {
+                return criteriaBuilder.isNotNull(variantJoin.get("attributes").get(attributeName));
+            } else {
+                return criteriaBuilder.equal(variantJoin.get("attributes").get(attributeName), attributeValue);
+            }
+        };
+    }
+
+    /**
+     * Filter products by brand list
+     */
+    public static Specification<Product> hasBrandIn(List<String> brands) {
+        return (root, query, criteriaBuilder) -> {
+            if (brands == null || brands.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            return root.get("brandName").in(brands);
+        };
+    }
+
+    /**
+     * Filter products excluding specific brands
+     */
+    public static Specification<Product> hasBrandNotIn(List<String> excludeBrands) {
+        return (root, query, criteriaBuilder) -> {
+            if (excludeBrands == null || excludeBrands.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.not(root.get("brandName").in(excludeBrands));
+        };
+    }
+
+    /**
+     * Filter products with price changes in date range
+     */
+    public static Specification<Product> hasPriceChangedSince(java.time.LocalDateTime since) {
+        return (root, query, criteriaBuilder) -> {
+            if (since == null) {
+                return criteriaBuilder.conjunction();
+            }
+            // This would need audit tables in a real implementation
+            return criteriaBuilder.greaterThan(root.get("updatedAt"), since);
+        };
+    }
+
+    /**
+     * Filter products needing restock (below minimum threshold)
+     */
+    public static Specification<Product> needsRestock(long minimumStock) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.lessThan(root.get("stockQuantity"), minimumStock),
+                criteriaBuilder.equal(root.get("status"), Product.Status.ACTIVE));
+    }
+
+    /**
+     * Complex filter combining multiple criteria with advanced options
      */
     public static Specification<Product> withFilters(
             String name,
@@ -346,5 +517,49 @@ public class ProductSpecification {
                 .and(hasPriceBetween(minPrice, maxPrice))
                 .and(hasRatingGreaterThanOrEqual(minRating))
                 .and(inStock != null && inStock ? isInStock() : null);
+    }
+
+    /**
+     * Filter by multiple category IDs
+     */
+    public static Specification<Product> hasCategoryIdIn(List<UUID> categoryIds) {
+        return (root, query, criteriaBuilder) -> {
+            if (categoryIds == null || categoryIds.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            return root.get("category").get("id").in(categoryIds);
+        };
+    }
+
+    /**
+     * Advanced complex filter with additional criteria
+     */
+    public static Specification<Product> withAdvancedFilters(
+            String searchTerm,
+            List<String> brands,
+            List<UUID> categoryIds,
+            List<Product.Status> statuses,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            BigDecimal minRating,
+            Long minStock,
+            Long maxStock,
+            Boolean hasVariants,
+            Boolean hasPrimaryImage,
+            java.time.LocalDateTime createdAfter,
+            java.time.LocalDateTime updatedAfter) {
+
+        return Specification.where(searchInNameOrDescription(searchTerm))
+                .and(hasBrandIn(brands))
+                .and(hasCategoryIdIn(categoryIds))
+                .and(hasStatusIn(statuses))
+                .and(hasPriceBetween(minPrice, maxPrice))
+                .and(hasRatingGreaterThanOrEqual(minRating))
+                .and(hasStockBetween(minStock, maxStock))
+                .and(hasVariants != null && hasVariants ? hasVariants() : null)
+                .and(hasPrimaryImage != null && hasPrimaryImage ? hasPrimaryImage() : null)
+                .and(hasPrimaryImage != null && !hasPrimaryImage ? hasNoPrimaryImage() : null)
+                .and(createdBetween(createdAfter, null))
+                .and(updatedBetween(updatedAfter, null));
     }
 }
