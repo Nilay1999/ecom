@@ -1,6 +1,12 @@
 package com.example.ecommerce.catalog.web.exception.productimage;
 
-public class InvalidImageDataException extends RuntimeException {
+import com.example.ecommerce.catalog.web.exception.CatalogException;
+
+/**
+ * Exception thrown when product image data validation fails.
+ */
+public class InvalidImageDataException extends CatalogException {
+
     public InvalidImageDataException(String message) {
         super(message);
     }
