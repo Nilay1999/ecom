@@ -25,29 +25,29 @@
     - Implement specification pattern for dynamic queries
     - _Requirements: 2.1, 2.2, 2.4_
 
-- [ ] 3. Implement service layer components
-  - [ ] 3.1 Complete ProductService implementation
+- [x] 3. Implement service layer components
+  - [x] 3.1 Complete ProductService implementation
     - Implement missing CRUD operations with business logic
     - Add product search and filtering methods
     - Implement stock management operations
     - Add product status management
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-  - [ ] 3.2 Complete CategoryService implementation
+  - [x] 3.2 Complete CategoryService implementation
     - Implement missing category operations
     - Add category hierarchy management methods
     - Implement slug generation and validation
     - Add category tree operations
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-  - [ ] 3.3 Create ProductImageService
+  - [x] 3.3 Create ProductImageService
     - Implement image management operations
     - Add primary image management logic
     - Implement image ordering functionality
     - Add image validation methods
     - _Requirements: 1.1, 1.2, 1.3_
 
-  - [ ] 3.4 Create ProductVariantService
+  - [x] 3.4 Create ProductVariantService
     - Implement variant CRUD operations
     - Add variant-specific business logic
     - Implement stock management per variant
