@@ -73,22 +73,22 @@
     - Implement bidirectional mapping support
     - _Requirements: 4.3_
 
-- [ ] 5. Complete controller implementations
-  - [ ] 5.1 Create ProductImageController
+- [x] 5. Complete controller implementations
+  - [x] 5.1 Create ProductImageController
     - Implement CRUD endpoints for product images
     - Add primary image management endpoints
     - Implement image ordering endpoints
     - Add proper HTTP status codes and validation
     - _Requirements: 6.1, 6.4_
 
-  - [ ] 5.2 Create ProductVariantController
+  - [x] 5.2 Create ProductVariantController
     - Implement CRUD endpoints for product variants
     - Add variant-specific business operation endpoints
     - Implement stock management endpoints
     - Add bulk operations support
     - _Requirements: 6.1, 6.2, 6.4_
 
-  - [ ] 5.3 Enhance existing controllers
+  - [x] 5.3 Enhance existing controllers
     - Add missing endpoints to ProductController
     - Add search and filtering endpoints
     - Implement bulk operations where needed

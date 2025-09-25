@@ -3,7 +3,6 @@ package com.example.ecommerce.catalog.web.dto.mapper;
 import com.example.ecommerce.catalog.domain.Category;
 import com.example.ecommerce.catalog.domain.Product;
 import com.example.ecommerce.catalog.domain.ProductImage;
-import com.example.ecommerce.catalog.domain.ProductVariant;
 import com.example.ecommerce.catalog.web.dto.product.*;
 
 import java.math.BigDecimal;

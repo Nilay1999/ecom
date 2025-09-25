@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;nal;
 import java.util.UUID;
 
 @Service
@@ -65,15 +64,16 @@ public class ProductService {
                 // Add images with validation
                 if (productImagelist != null && !productImagelist.isEmpty()) {
                         for (ProductImagePayload image : productImagelist) {
-                                product.addImage(new ProductImage(image.getImageUrl(), image.isPrimary(), product));
+                                product.addImage(new ProductImage(image.getImageUrl(), image.getIsPrimary(), product));
                         }
                 }
 
                 Product savedProduct = productRepo.save(product);
                 return new CreateProductResponseDTO(savedProduct.getId(), savedProduct.getBrandName(),
-                                savedProduct.getDescription(), savedProduct.getPrice(),
-                                savedProduct.getWeight(), savedProduct.getStockQuantity(),
-                                savedProduct.getCategory(), savedProduct.getProductImages());
+                                savedProduct.getDescription(), brand, savedProduct.getPrice(),
+                                savedProduct.getWeight(), weight, savedProduct.getStockQuantity(),
+                                brand, savedProduct.getCategory(), savedProduct.getProductImages(), null, false, false,
+                                false, false, false, 0, weight, null, null);
         }
 
         /**
