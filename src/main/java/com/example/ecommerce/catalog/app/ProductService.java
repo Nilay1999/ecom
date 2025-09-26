@@ -26,47 +26,11 @@ public class ProductService {
         this.categoryRepo = categoryRepo;
     }
 
-    public CreateProductResponseDTO create(String name, String description, BigDecimal price, String brand,
-            BigDecimal weight, UUID categoryId, List<ProductImagePayload> productImagelist) {
-
-        Category category = categoryRepo.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
-
-        Product product = new Product.Builder().productName(name)
-                .description(description)
-                .brandName(brand)
-                .price(price)
-                .weight(weight)
-                .status(Product.Status.OUT_OF_STOCK)
-                .category(category)
-                .build();
-        for (ProductImagePayload image : productImagelist) {
-            product.addImage(new ProductImage(image.getImageUrl(), image.isPrimary(), product));
-        }
-        productRepo.save(product);
-        return new CreateProductResponseDTO(product.getId(), product.getBrandName(), product.getDescription(),
-                                            product.getPrice(), product.getWeight(), product.getStockQuantity(),
-                                            product.getCategory(), product.getProductImages());
+    public CreateProductResponseDTO create() {
     }
 
-    public CreateProductResponseDTO create(String name, String description, BigDecimal price, String brand,
-            BigDecimal weight, UUID categoryId) {
-        Category category = categoryRepo.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+    public CreateProductResponseDTO create() {
 
-        Product product = new Product.Builder().productName(name)
-                .description(description)
-                .brandName(brand)
-                .price(price)
-                .weight(weight)
-                .category(category)
-                .status(Product.Status.OUT_OF_STOCK)
-                .build();
-        productRepo.save(product);
-
-        return new CreateProductResponseDTO(product.getId(), product.getBrandName(), product.getDescription(),
-                                            product.getPrice(), product.getWeight(), product.getStockQuantity(),
-                                            product.getCategory());
     }
 
     public Page<Product> getPaginatedProducts(int page, int size) {

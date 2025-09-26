@@ -2,9 +2,8 @@ package com.example.ecommerce.catalog.app;
 
 import com.example.ecommerce.catalog.domain.Category;
 import com.example.ecommerce.catalog.infra.CategoryRepository;
-import com.example.ecommerce.catalog.util.SlugUtil;
-import com.example.ecommerce.catalog.web.exception.category.CategoryNotFoundException;
-import com.example.ecommerce.catalog.web.exception.category.DuplicateCategoryException;
+import com.example.ecommerce.common.exception.category.CategoryNotFoundException;
+import com.example.ecommerce.common.exception.category.DuplicateCategoryException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,8 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
-
-;
 
 @Service
 @Transactional
@@ -52,12 +49,7 @@ public class CategoryService {
     // -------------------- private helpers --------------------
 
     private Category saveCategory(String name, String description, Category parent) {
-        String slug = generateUniqueSlug(name);
-        validateCategoryData(name, slug);
-
-        Category.Builder builder = new Category.Builder().setName(name)
-                .setDescription(description)
-                .setSlug(slug);
+        Category.Builder builder = new Category.Builder().setName(name).setDescription(description);
 
         if (parent != null) builder.setParent(parent);
 
@@ -71,17 +63,5 @@ public class CategoryService {
         if (categoryRepo.existsBySlug(slug)) {
             throw new DuplicateCategoryException("A category with slug '" + slug + "' already exists");
         }
-    }
-
-    private String generateUniqueSlug(String name) {
-        String baseSlug = SlugUtil.toSlug(name);
-        String slug = baseSlug;
-        int counter = 1;
-
-        while (categoryRepo.existsBySlug(slug)) {
-            slug = baseSlug + "-" + counter;
-            counter++;
-        }
-        return slug;
     }
 }

@@ -1,10 +1,9 @@
 package com.example.ecommerce.catalog.domain;
 
-import com.example.ecommerce.common.util.SlugGenerator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,9 +11,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
+@Setter
 @Entity
-@Table(name = "categories")
-public class Category {
+@Table(name = "brands")
+public class Brand {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -23,22 +23,20 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(length = 500)
+    @Column(length = 1000)
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "parent_id")
-    @JsonIgnore
-    private Category parent;
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<Category> subCategories = new ArrayList<>();
-
-    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
-    private final List<Product> products = new ArrayList<>();
+    @Column(length = 500)
+    private String logoUrl;
 
     @Column(length = 200, unique = true, nullable = false)
     private String slug;
+
+    @OneToMany(mappedBy = "brand", cascade = CascadeType.PERSIST)
+    private final List<Product> products = new ArrayList<>();
+
+    @Column(nullable = false)
+    private boolean active = true;
 
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
@@ -46,19 +44,20 @@ public class Category {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    private Category(Builder builder) {
+    private Brand(Builder builder) {
         this.name = builder.name;
         this.description = builder.description;
-        this.parent = builder.parent;
+        this.logoUrl = builder.logoUrl;
         this.slug = builder.slug;
+        this.active = builder.active;
     }
 
-    // --- Builder ---
     public static class Builder {
         private String name;
         private String description;
+        private String logoUrl;
         private String slug;
-        private Category parent;
+        private boolean active = true;
 
         public Builder setName(String name) {
             this.name = name;
@@ -70,8 +69,8 @@ public class Category {
             return this;
         }
 
-        public Builder setParent(Category parent) {
-            this.parent = parent;
+        public Builder setLogoUrl(String logoUrl) {
+            this.logoUrl = logoUrl;
             return this;
         }
 
@@ -80,8 +79,13 @@ public class Category {
             return this;
         }
 
-        public Category build() {
-            return new Category(this);
+        public Builder setActive(boolean active) {
+            this.active = active;
+            return this;
+        }
+
+        public Brand build() {
+            return new Brand(this);
         }
     }
 
@@ -90,34 +94,20 @@ public class Category {
         this.slug = generateSlug(name);
     }
 
-    private String generateSlug(String name) {
-        return SlugGenerator.generateSlug(name);
-    }
-
     public void updateDescription(String description) {
         this.description = description;
     }
 
-    public void changeParent(Category newParent) {
-        if (this.parent != null) {
-            this.parent.getSubCategories().remove(this);
-        }
-        this.parent = newParent;
-        if (newParent != null) {
-            newParent.getSubCategories().add(this);
-        }
+    public void updateLogo(String logoUrl) {
+        this.logoUrl = logoUrl;
     }
 
-    public boolean isRootCategory() {
-        return this.parent == null;
+    public void activate() {
+        this.active = true;
     }
 
-    public boolean hasSubCategories() {
-        return !this.subCategories.isEmpty();
-    }
-
-    public boolean hasProducts() {
-        return !this.products.isEmpty();
+    public void deactivate() {
+        this.active = false;
     }
 
     @PrePersist
@@ -129,5 +119,9 @@ public class Category {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    private String generateSlug(String name) {
+        return name.toLowerCase().replaceAll("[^a-z0-9]+", "-");
     }
 }

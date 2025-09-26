@@ -1,4 +1,4 @@
-package com.example.ecommerce.catalog.web.exception.category;
+package com.example.ecommerce.common.exception.category;
 
 
 public class DuplicateCategoryException extends RuntimeException {

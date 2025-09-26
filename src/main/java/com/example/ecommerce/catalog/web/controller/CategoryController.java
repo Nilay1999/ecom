@@ -19,12 +19,16 @@ public class CategoryController {
     }
 
     @PostMapping
-    public Category create(@RequestBody CreateCategoryRequest request) {
+    public ResponseEntity<Category> create(@RequestBody CreateCategoryRequest request) {
+        Category category;
         if (request.getParentCategoryId() != null) {
-            return categoryService.create(request.getCategoryName(), request.getDescription(),
-                                          request.getParentCategoryId());
+            category = categoryService.create(request.getCategoryName(), request.getDescription(),
+                                              request.getParentCategoryId());
+
+        } else {
+            category = categoryService.create(request.getCategoryName(), request.getDescription());
         }
-        return categoryService.create(request.getCategoryName(), request.getDescription());
+        return ResponseEntity.ok(category);
     }
 
     @GetMapping
@@ -35,12 +39,12 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public Category getCategoryById(@PathVariable UUID id) {
-        return categoryService.findById(id);
+    public ResponseEntity<Category> getCategoryById(@PathVariable UUID id) {
+        return ResponseEntity.ok(categoryService.findById(id));
     }
 
     @GetMapping("/slug/{slug}")
-    public Category getCategoryBySlug(@PathVariable String slug) {
-        return categoryService.findBySlug(slug);
+    public ResponseEntity<Category> getCategoryBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(categoryService.findBySlug(slug));
     }
 }
