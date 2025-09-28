@@ -2,8 +2,8 @@ package com.example.ecommerce.catalog.web.controller;
 
 import com.example.ecommerce.catalog.app.ProductService;
 import com.example.ecommerce.catalog.domain.Product;
-import com.example.ecommerce.catalog.web.dto.product.CreateProductRequestDTO;
-import com.example.ecommerce.catalog.web.dto.product.CreateProductResponseDTO;
+import com.example.ecommerce.catalog.web.dto.product.CreateProductRequestDto;
+import com.example.ecommerce.catalog.web.dto.product.CreateProductResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -24,19 +24,14 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<CreateProductResponseDTO> create(@Valid @RequestBody CreateProductRequestDTO request) {
-        CreateProductResponseDTO createdProduct;
-        if (request.getProductImageList() != null || !request.getProductImageList()
-                .isEmpty()) {
-            createdProduct = productService.create(request.getProductName(), request.getDescription(),
-                    request.getPrice(), request.getBrandName(), request.getWeight(),
-                    request.getCategoryId(), request.getProductImageList());
-        } else {
-            createdProduct = productService.create(request.getProductName(), request.getDescription(),
-                    request.getPrice(), request.getBrandName(), request.getWeight(),
-                    request.getCategoryId());
-        }
-
+    public ResponseEntity<CreateProductResponseDto> create(@Valid @RequestBody CreateProductRequestDto request) {
+        CreateProductResponseDto createdProduct = productService.create(request.productName(), request.description(),
+                                                                        request.price(), request.brandId(),
+                                                                        request.categoryId(), request.color(),
+                                                                        request.rating(), request.status(),
+                                                                        request.size(), request.color(),
+                                                                        request.stockQuantity(), request.weight());
+        
         return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
     }
 

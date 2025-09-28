@@ -15,6 +15,12 @@ import java.util.UUID;
 @Entity
 @Table(name = "categories")
 public class Category {
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Category> subCategories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
+    private final List<Product> products = new ArrayList<>();
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -30,12 +36,6 @@ public class Category {
     @JoinColumn(name = "parent_id")
     @JsonIgnore
     private Category parent;
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<Category> subCategories = new ArrayList<>();
-
-    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
-    private final List<Product> products = new ArrayList<>();
 
     @Column(length = 200, unique = true, nullable = false)
     private String slug;
@@ -53,36 +53,7 @@ public class Category {
         this.slug = builder.slug;
     }
 
-    // --- Builder ---
-    public static class Builder {
-        private String name;
-        private String description;
-        private String slug;
-        private Category parent;
-
-        public Builder setName(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder setDescription(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder setParent(Category parent) {
-            this.parent = parent;
-            return this;
-        }
-
-        public Builder setSlug(String slug) {
-            this.slug = slug;
-            return this;
-        }
-
-        public Category build() {
-            return new Category(this);
-        }
+    protected Category() {
     }
 
     public void updateName(String name) {
@@ -129,5 +100,37 @@ public class Category {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    // --- Builder ---
+    public static class Builder {
+        private String name;
+        private String description;
+        private String slug;
+        private Category parent;
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder setDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder setParent(Category parent) {
+            this.parent = parent;
+            return this;
+        }
+
+        public Builder setSlug(String slug) {
+            this.slug = slug;
+            return this;
+        }
+
+        public Category build() {
+            return new Category(this);
+        }
     }
 }

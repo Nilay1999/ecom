@@ -15,6 +15,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "brands")
 public class Brand {
+    @OneToMany(mappedBy = "brand", cascade = CascadeType.PERSIST)
+    private final List<Product> products = new ArrayList<>();
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -32,9 +35,6 @@ public class Brand {
     @Column(length = 200, unique = true, nullable = false)
     private String slug;
 
-    @OneToMany(mappedBy = "brand", cascade = CascadeType.PERSIST)
-    private final List<Product> products = new ArrayList<>();
-
     @Column(nullable = false)
     private boolean active = true;
 
@@ -50,6 +50,45 @@ public class Brand {
         this.logoUrl = builder.logoUrl;
         this.slug = builder.slug;
         this.active = builder.active;
+    }
+
+    protected Brand() {
+    }
+
+    public void updateName(String name) {
+        this.name = name;
+        this.slug = generateSlug(name);
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateLogo(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
+
+    public void activate() {
+        this.active = true;
+    }
+
+    public void deactivate() {
+        this.active = false;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    private String generateSlug(String name) {
+        return name.toLowerCase().replaceAll("[^a-z0-9]+", "-");
     }
 
     public static class Builder {
@@ -87,41 +126,5 @@ public class Brand {
         public Brand build() {
             return new Brand(this);
         }
-    }
-
-    public void updateName(String name) {
-        this.name = name;
-        this.slug = generateSlug(name);
-    }
-
-    public void updateDescription(String description) {
-        this.description = description;
-    }
-
-    public void updateLogo(String logoUrl) {
-        this.logoUrl = logoUrl;
-    }
-
-    public void activate() {
-        this.active = true;
-    }
-
-    public void deactivate() {
-        this.active = false;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    private String generateSlug(String name) {
-        return name.toLowerCase().replaceAll("[^a-z0-9]+", "-");
     }
 }

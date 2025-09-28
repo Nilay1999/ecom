@@ -36,8 +36,7 @@ public class BrandService {
     }
 
     public Brand updateBrand(UUID brandId, String name, String description, String logoUrl, Boolean active) {
-        Brand brand = brandRepository.findById(brandId)
-                .orElseThrow(() -> new RuntimeException("Brand not found"));
+        Brand brand = brandRepository.findById(brandId).orElseThrow(() -> new RuntimeException("Brand not found"));
         if (name != null && !name.isBlank()) {
             brand.setName(name);
         }
@@ -51,6 +50,12 @@ public class BrandService {
             brand.setActive(active);
         }
 
+        return brandRepository.save(brand);
+    }
+
+    public Brand updateBrand(UUID brandId, Boolean active) {
+        Brand brand = brandRepository.findById(brandId).orElseThrow(() -> new RuntimeException("Brand not found"));
+        brand.setActive(active);
         return brandRepository.save(brand);
     }
 

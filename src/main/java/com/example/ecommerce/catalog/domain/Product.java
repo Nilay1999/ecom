@@ -31,10 +31,6 @@ public class Product {
     @Column(length = 20000)
     private String description;
 
-    @NotBlank
-    @Column(nullable = false)
-    private String brandName;
-
     @Digits(integer = 1, fraction = 2)
     @Column(precision = 3, scale = 2)
     private BigDecimal rating = BigDecimal.ONE;
@@ -66,39 +62,16 @@ public class Product {
 
     @Column(length = 50)
     private String sku;
-
-    public enum Status {
-        ACTIVE, IN_ACTIVE, OUT_OF_STOCK
-    }
-
     @Column(name = "status", length = 25, nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status = Status.OUT_OF_STOCK;
-
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> productImages = new ArrayList<>();
-
-    public void addImage(ProductImage image) {
-        productImages.add(image);
-        image.setProduct(this);
-    }
-
-    public void removeImage(ProductImage image) {
-        productImages.remove(image);
-        image.setProduct(null);
-    }
-
-    public Optional<ProductImage> getPrimaryImage() {
-        return productImages.stream().filter(ProductImage::isPrimary).findFirst();
-    }
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
     private Brand brand;
-
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
-
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
@@ -118,6 +91,74 @@ public class Product {
         this.color = builder.color;
         this.sku = builder.sku;
         this.size = builder.size;
+    }
+
+    public void addImage(ProductImage image) {
+        productImages.add(image);
+        image.setProduct(this);
+    }
+
+    public void removeImage(ProductImage image) {
+        productImages.remove(image);
+        image.setProduct(null);
+    }
+
+    public Optional<ProductImage> getPrimaryImage() {
+        return productImages.stream().filter(ProductImage::isPrimary).findFirst();
+    }
+
+    public void updateStock(long quantity) {
+        this.stockQuantity = quantity;
+        updateStatusBasedOnStock();
+    }
+
+    public void assignToBrand(Brand brand) {
+        this.brand = brand;
+    }
+
+    public void updatePrice(BigDecimal newPrice) {
+        if (newPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Price must be greater than zero");
+        }
+        this.price = newPrice;
+    }
+
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
+
+    private void updateStatusBasedOnStock() {
+        if (this.stockQuantity > 0) {
+            this.status = Status.ACTIVE;
+        } else {
+            this.status = Status.OUT_OF_STOCK;
+        }
+    }
+
+    public void assignToCategory(Category category) {
+        if (this.category != null) {
+            this.category.getProducts().remove(this);
+        }
+        this.category = category;
+        if (category != null) {
+            category.getProducts().add(this);
+        }
+    }
+
+    // --- JPA Lifecycle Hooks ---
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    public enum Status {
+        ACTIVE, IN_ACTIVE, OUT_OF_STOCK
     }
 
     // --- Builder ---
@@ -210,55 +251,5 @@ public class Product {
         public Product build() {
             return new Product(this);
         }
-    }
-
-    public void updateStock(long quantity) {
-        this.stockQuantity = quantity;
-        updateStatusBasedOnStock();
-    }
-
-    public void assignToBrand(Brand brand) {
-        this.brand = brand;
-    }
-
-    public void updatePrice(BigDecimal newPrice) {
-        if (newPrice.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Price must be greater than zero");
-        }
-        this.price = newPrice;
-    }
-
-    public void updateStatus(Status status) {
-        this.status = status;
-    }
-
-    private void updateStatusBasedOnStock() {
-        if (this.stockQuantity > 0) {
-            this.status = Status.ACTIVE;
-        } else {
-            this.status = Status.OUT_OF_STOCK;
-        }
-    }
-
-    public void assignToCategory(Category category) {
-        if (this.category != null) {
-            this.category.getProducts().remove(this);
-        }
-        this.category = category;
-        if (category != null) {
-            category.getProducts().add(this);
-        }
-    }
-
-    // --- JPA Lifecycle Hooks ---
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }
