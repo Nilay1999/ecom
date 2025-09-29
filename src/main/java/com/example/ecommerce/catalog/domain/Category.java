@@ -95,6 +95,9 @@ public class Category {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (this.slug == null || this.slug.isBlank()) {
+            this.slug = generateSlug(this.name);
+        }
     }
 
     @PreUpdate

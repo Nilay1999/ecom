@@ -8,11 +8,11 @@ import java.util.List;
 
 @Getter
 @Setter
-@Schema(description = "Paginated response for categories")
-public class CategoryPageResponseDto {
+@Schema(description = "Paginated response")
+public class PageResponseDto<T> {
 
-    @Schema(description = "List of categories in the current page")
-    private List<CategoryResponseDto> content;
+    @Schema(description = "List of item in the current page")
+    private List<T> content;
 
     @Schema(description = "Current page number (0-based)")
     private int number;

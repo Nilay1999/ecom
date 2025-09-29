@@ -2,8 +2,9 @@ package com.example.ecommerce.catalog.app;
 
 import com.example.ecommerce.catalog.domain.Category;
 import com.example.ecommerce.catalog.infra.CategoryRepository;
-import com.example.ecommerce.catalog.web.dto.category.CategoryPageResponseDto;
 import com.example.ecommerce.catalog.web.dto.category.CategoryResponseDto;
+import com.example.ecommerce.catalog.web.dto.category.CreateCategoryRequest;
+import com.example.ecommerce.catalog.web.dto.category.PageResponseDto;
 import com.example.ecommerce.common.exception.category.CategoryNotFoundException;
 import com.example.ecommerce.common.exception.category.DuplicateCategoryException;
 import org.springframework.data.domain.Page;
@@ -24,14 +25,13 @@ public class CategoryService {
         this.categoryRepo = categoryRepo;
     }
 
-    public Category create(String name, String description) {
-        return saveCategory(name, description, null);
-    }
-
     public Category create(String name, String description, UUID parentCategoryId) {
-        Category parentCategory = categoryRepo.findById(parentCategoryId)
-                .orElseThrow(() -> new CategoryNotFoundException("Parent Category not found"));
-        return saveCategory(name, description, parentCategory);
+        if (parentCategoryId != null) {
+            Category parentCategory = categoryRepo.findById(parentCategoryId)
+                    .orElseThrow(() -> new CategoryNotFoundException("Parent Category not found"));
+            return saveCategory(name, description, parentCategory);
+        }
+        return saveCategory(name, description, null);
     }
 
     public Category findById(UUID id) {
@@ -43,13 +43,13 @@ public class CategoryService {
         return categoryRepo.findCategoriesWithChildren(PageRequest.of(page, Math.min(size, 100)));
     }
 
-    public CategoryPageResponseDto getPaginated(int page, int size) {
+    public PageResponseDto<CategoryResponseDto> getPaginated(int page, int size) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 100));
         Page<Category> categoryPage = categoryRepo.findAll(pageable);
 
         List<CategoryResponseDto> dtoList = categoryPage.getContent().stream().map(this::toDto).toList();
 
-        CategoryPageResponseDto response = new CategoryPageResponseDto();
+        PageResponseDto<CategoryResponseDto> response = new PageResponseDto<CategoryResponseDto>();
         response.setContent(dtoList);
         response.setNumber(categoryPage.getNumber());
         response.setSize(categoryPage.getSize());
@@ -64,6 +64,32 @@ public class CategoryService {
     public Category findBySlug(String slug) {
         return categoryRepo.findBySlug(slug)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found with slug: " + slug));
+    }
+
+    public List<Category> getCategoryTreeByParentId(UUID parentId) {
+        Category parent = categoryRepo.findById(parentId)
+                .orElseThrow(() -> new CategoryNotFoundException("Parent Category not found with id: " + parentId));
+
+        return categoryRepo.findByParent(parent);
+    }
+
+    public Category upsertCategory(UUID id, CreateCategoryRequest request) {
+        Category category = categoryRepo.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + id));
+        if (request.getCategoryName() != null) {
+            category.updateName(request.getCategoryName());
+        }
+        if (request.getDescription() != null) {
+            category.updateDescription(request.getDescription());
+        }
+        if (request.getParentCategoryId() != null) {
+            Category parent = categoryRepo.findById(request.getParentCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Parent not found"));
+            category.changeParent(parent);
+        } else {
+            category.changeParent(null);
+        }
+        return categoryRepo.save(category);
     }
 
     // -------------------- private helpers --------------------

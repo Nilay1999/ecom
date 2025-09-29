@@ -4,6 +4,7 @@ import com.example.ecommerce.catalog.app.BrandService;
 import com.example.ecommerce.catalog.domain.Brand;
 import com.example.ecommerce.catalog.web.dto.brand.CreateBrandRequestDto;
 import com.example.ecommerce.catalog.web.dto.brand.UpdateBrandRequestDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/brand")
+@RequestMapping("/brand")
+@Tag(name = "Brands", description = "Brands management APIs")
 public class BrandController {
     private final BrandService brandService;
 
