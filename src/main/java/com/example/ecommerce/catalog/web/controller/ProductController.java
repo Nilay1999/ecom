@@ -2,8 +2,10 @@ package com.example.ecommerce.catalog.web.controller;
 
 import com.example.ecommerce.catalog.app.ProductService;
 import com.example.ecommerce.catalog.domain.Product;
+import com.example.ecommerce.catalog.web.dto.category.PageResponseDto;
 import com.example.ecommerce.catalog.web.dto.product.CreateProductRequestDto;
 import com.example.ecommerce.catalog.web.dto.product.CreateProductResponseDto;
+import com.example.ecommerce.catalog.web.dto.product.SearchProductResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,8 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -57,14 +57,18 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    @GetMapping(":id")
-    public ResponseEntity<Product> getProductById(@PathVariable UUID id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable(name = "id") UUID id) {
         Product product = productService.getProductById(id);
-        return new ResponseEntity<>(product, HttpStatus.CREATED);
+        return new ResponseEntity<>(product, HttpStatus.FOUND);
     }
 
-    @GetMapping("/byPrice")
-    public List<Product> byPrice(@RequestParam BigDecimal min, @RequestParam BigDecimal max) {
-        return productService.findByPriceRange(min, max);
+    @GetMapping("/search")
+    public ResponseEntity<PageResponseDto<SearchProductResponseDto>> search(
+            @RequestParam(name = "searchQuery") String searchQuery, @RequestParam(name = "inStock") Boolean inStock,
+            @RequestParam(name = "page") int page, @RequestParam(name = "limit") int limit,
+            @RequestParam(name = "sort") String sort) {
+
+        return ResponseEntity.ok(productService.searchProducts(searchQuery, inStock, page, limit, sort));
     }
 }

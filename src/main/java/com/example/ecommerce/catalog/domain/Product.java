@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Getter
 @Entity
-@Table(name = "products", indexes = {@Index(name = "idx_product_name", columnList = "productName"), @Index(name =
+@Table(name = "products", indexes = {@Index(name = "idx_product_name", columnList = "productName"), @Index(name = 
         "idx_brand_name", columnList = "brandName")})
 public class Product {
     @Id
@@ -62,16 +62,21 @@ public class Product {
 
     @Column(length = 50)
     private String sku;
+
     @Column(name = "status", length = 25, nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status = Status.OUT_OF_STOCK;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> productImages = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
     private Brand brand;
+
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
+    
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 

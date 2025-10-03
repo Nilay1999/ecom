@@ -6,11 +6,16 @@ import com.example.ecommerce.catalog.domain.Product;
 import com.example.ecommerce.catalog.infra.BrandRepository;
 import com.example.ecommerce.catalog.infra.CategoryRepository;
 import com.example.ecommerce.catalog.infra.ProductRepository;
+import com.example.ecommerce.catalog.web.dto.category.PageResponseDto;
 import com.example.ecommerce.catalog.web.dto.product.CreateProductResponseDto;
+import com.example.ecommerce.catalog.web.dto.product.SearchProductResponseDto;
+import com.example.ecommerce.common.specification.ProductSpecifications;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -62,5 +67,38 @@ public class ProductService {
     public List<Product> findByPriceRange(BigDecimal min, BigDecimal max) {
         return productRepository.findAll().stream()
                 .filter(p -> p.getPrice().compareTo(min) >= 0 && p.getPrice().compareTo(max) <= 0).toList();
+    }
+
+    public PageResponseDto<SearchProductResponseDto> searchProducts(String searchQuery, boolean inStock, int page,
+            int limit, String sort) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(sort));
+        Specification<Product> spec = Specification.where(null);
+
+        if (searchQuery != null && !searchQuery.isBlank()) {
+            spec = spec.and(ProductSpecifications.hasNameOrDescriptionLike(searchQuery));
+        }
+        if (inStock) {
+            spec = spec.and(ProductSpecifications.isInStock(true));
+        }
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
+        List<SearchProductResponseDto> dtoList = productPage.getContent().stream().map(this::toDto).toList();
+
+        PageResponseDto<SearchProductResponseDto> response = new PageResponseDto<>();
+        response.setContent(dtoList);
+        response.setNumber(productPage.getNumber());
+        response.setSize(productPage.getSize());
+        response.setTotalElements(productPage.getTotalElements());
+        response.setTotalPages(productPage.getTotalPages());
+        response.setHasNext(productPage.hasNext());
+        response.setHasPrevious(productPage.hasPrevious());
+        return response;
+    }
+
+    // -------------------- private helpers --------------------
+
+    private SearchProductResponseDto toDto(Product product) {
+        return new SearchProductResponseDto(product.getId(), product.getProductName(), product.getDescription(),
+                                            product.getPrice(), product.getStockQuantity(), product.getStatus(),
+                                            product.getPrimaryImage());
     }
 }
