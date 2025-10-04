@@ -1,15 +1,15 @@
 package com.example.ecommerce.catalog.web.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import com.example.ecommerce.catalog.app.BrandService;
 import com.example.ecommerce.catalog.domain.Brand;
 import com.example.ecommerce.catalog.web.dto.brand.CreateBrandRequestDto;
 import com.example.ecommerce.catalog.web.dto.brand.UpdateBrandRequestDto;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/brand")
@@ -23,7 +23,7 @@ public class BrandController {
 
     @GetMapping
     public ResponseEntity<Page<Brand>> getPaginatedCategories(@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+                                                              @RequestParam(defaultValue = "10") int size) {
         Page<Brand> categories = brandService.getPaginated(page, size);
         return ResponseEntity.ok(categories);
     }
@@ -34,16 +34,16 @@ public class BrandController {
     }
 
     @PostMapping
-    public ResponseEntity<Brand> createBrand(@RequestBody CreateBrandRequestDto request) {
+    public ResponseEntity<Brand> createBrand(@Valid @RequestBody CreateBrandRequestDto request) {
         Brand brand = brandService.createBrand(request.name(), request.description(), request.logoUrl(),
-                                               request.active());
+                request.active());
         return ResponseEntity.ok(brand);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Brand> updateBrand(@PathVariable UUID id, @RequestBody UpdateBrandRequestDto request) {
+    public ResponseEntity<Brand> updateBrand(@PathVariable UUID id, @Valid @RequestBody UpdateBrandRequestDto request) {
         return ResponseEntity.ok(brandService.updateBrand(id, request.name(), request.description(), request.logoUrl(),
-                                                          request.active()));
+                request.active()));
     }
 
     @PatchMapping("/{id}/status")

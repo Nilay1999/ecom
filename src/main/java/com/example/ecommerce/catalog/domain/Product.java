@@ -1,23 +1,22 @@
 package com.example.ecommerce.catalog.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Getter
 @Entity
-@Table(name = "products", indexes = {@Index(name = "idx_product_name", columnList = "productName"), @Index(name = 
+@Table(name = "products", indexes = {@Index(name = "idx_product_name", columnList = "productName"), @Index(name =
         "idx_brand_name", columnList = "brandName")})
 public class Product {
     @Id
@@ -76,7 +75,7 @@ public class Product {
 
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
-    
+
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
@@ -86,7 +85,7 @@ public class Product {
     private Product(Builder builder) {
         this.productName = builder.productName;
         this.description = builder.description;
-        this.rating = builder.rating != null ? builder.rating : BigDecimal.ZERO;
+        this.rating = builder.rating != null ? builder.rating:BigDecimal.ZERO;
         this.stockQuantity = builder.stockQuantity;
         this.price = builder.price;
         this.weight = builder.weight;
@@ -96,6 +95,30 @@ public class Product {
         this.color = builder.color;
         this.sku = builder.sku;
         this.size = builder.size;
+    }
+
+    public void updateProductName(String name) {
+        this.productName = name;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateSku(String sku) {
+        this.sku = sku;
+    }
+
+    public void updateSize(String size) {
+        this.size = size;
+    }
+
+    public void updateColor(String color) {
+        this.color = color;
+    }
+
+    public void updateWeight(BigDecimal weight) {
+        this.weight = weight;
     }
 
     public void addImage(ProductImage image) {
