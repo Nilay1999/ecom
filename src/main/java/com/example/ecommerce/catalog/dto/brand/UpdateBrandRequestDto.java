@@ -1,4 +1,4 @@
-package com.example.ecommerce.catalog.web.dto.brand;
+package com.example.ecommerce.catalog.dto.brand;
 
 import jakarta.validation.constraints.Max;
 

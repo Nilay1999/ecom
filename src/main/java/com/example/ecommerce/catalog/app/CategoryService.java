@@ -1,20 +1,19 @@
 package com.example.ecommerce.catalog.app;
 
-import com.example.ecommerce.catalog.domain.Category;
-import com.example.ecommerce.catalog.infra.CategoryRepository;
-import com.example.ecommerce.catalog.web.dto.category.CategoryResponseDto;
-import com.example.ecommerce.catalog.web.dto.category.CreateCategoryRequest;
-import com.example.ecommerce.catalog.web.dto.category.PageResponseDto;
-import com.example.ecommerce.common.exception.category.CategoryNotFoundException;
-import com.example.ecommerce.common.exception.category.DuplicateCategoryException;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.UUID;
+import com.example.ecommerce.catalog.domain.Category;
+import com.example.ecommerce.catalog.dto.category.CategoryResponseDto;
+import com.example.ecommerce.catalog.dto.category.CreateCategoryRequest;
+import com.example.ecommerce.catalog.dto.category.PageResponseDto;
+import com.example.ecommerce.catalog.infra.CategoryRepository;
+import com.example.ecommerce.common.exception.category.CategoryNotFoundException;
+import com.example.ecommerce.common.exception.category.DuplicateCategoryException;
 
 @Service
 @Transactional

@@ -1,8 +1,7 @@
-package com.example.ecommerce.catalog.web.dto.category;
+package com.example.ecommerce.catalog.dto.category;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
-
 import java.util.UUID;
 
 @Getter

@@ -11,17 +11,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.coyote.BadRequestException;
 import com.example.ecommerce.catalog.domain.Brand;
 import com.example.ecommerce.catalog.domain.Category;
 import com.example.ecommerce.catalog.domain.Product;
+import com.example.ecommerce.catalog.dto.category.PageResponseDto;
+import com.example.ecommerce.catalog.dto.product.CreateProductResponseDto;
+import com.example.ecommerce.catalog.dto.product.PartialProductUpdateRequestDto;
+import com.example.ecommerce.catalog.dto.product.SearchProductResponseDto;
+import com.example.ecommerce.catalog.dto.product.UpdateProductRequestDto;
 import com.example.ecommerce.catalog.infra.BrandRepository;
 import com.example.ecommerce.catalog.infra.CategoryRepository;
 import com.example.ecommerce.catalog.infra.ProductRepository;
-import com.example.ecommerce.catalog.web.dto.category.PageResponseDto;
-import com.example.ecommerce.catalog.web.dto.product.CreateProductResponseDto;
-import com.example.ecommerce.catalog.web.dto.product.PartialProductUpdateRequestDto;
-import com.example.ecommerce.catalog.web.dto.product.SearchProductResponseDto;
-import com.example.ecommerce.catalog.web.dto.product.UpdateProductRequestDto;
 import com.example.ecommerce.common.specification.ProductSpecifications;
 
 @Service
@@ -130,6 +131,22 @@ public class ProductService {
         updateIfPresent(payload.sku(), currentProduct::updateSku);
 
         return productRepository.save(currentProduct);
+    }
+
+    public Product updateProductPrice(UUID id, BigDecimal price) throws BadRequestException {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found: " + id));
+        product.updatePrice(price);
+        return product;
+    }
+
+    public Product updateProductCategory(UUID id, UUID catergoryId) throws BadRequestException {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found: " + id));
+        Category category = categoryRepository.findById(catergoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Category not found: " + catergoryId));
+        product.assignToCategory(category);
+        return product;
     }
 
     public PageResponseDto<SearchProductResponseDto> searchProducts(String searchQuery, boolean inStock, int page,

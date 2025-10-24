@@ -12,10 +12,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.apache.coyote.BadRequestException;
 import com.example.ecommerce.catalog.app.ProductService;
 import com.example.ecommerce.catalog.domain.Product;
-import com.example.ecommerce.catalog.web.dto.category.PageResponseDto;
-import com.example.ecommerce.catalog.web.dto.product.*;
+import com.example.ecommerce.catalog.dto.category.PageResponseDto;
+import com.example.ecommerce.catalog.dto.product.*;
 
 @RestController
 @RequestMapping("/products")
@@ -55,7 +56,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<CreateProductResponseDto> create(@Valid @RequestBody CreateProductRequestDto request) {
+    public ResponseEntity<CreateProductResponseDto> createProduct(@Valid @RequestBody CreateProductRequestDto request) {
         CreateProductResponseDto createdProduct = productService.createProduct(request.productName(),
                 request.description(),
                 request.price(),
@@ -73,16 +74,30 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> put(@PathVariable(name = "id") UUID id,
-                                       @Valid @RequestBody UpdateProductRequestDto request) {
+    public ResponseEntity<Product> upsertProduct(@PathVariable(name = "id") UUID id,
+                                                 @Valid @RequestBody UpdateProductRequestDto request) {
         Product product = productService.putProduct(id, request);
         return new ResponseEntity<>(product, HttpStatus.ACCEPTED);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Product> patch(@PathVariable(name = "id") UUID id,
-                                         @Valid @RequestBody PartialProductUpdateRequestDto request) {
+    public ResponseEntity<Product> updateProduct(@PathVariable(name = "id") UUID id,
+                                                 @Valid @RequestBody PartialProductUpdateRequestDto request) {
         Product product = productService.updateProductPartial(id, request);
+        return new ResponseEntity<>(product, HttpStatus.ACCEPTED);
+    }
+
+    @PatchMapping("/{id}/stock")
+    public ResponseEntity<Product> updateProductStock(@PathVariable(name = "id") UUID id,
+                                                      @Valid @RequestBody PriceUpdateRequestDto request) throws BadRequestException {
+        Product product = productService.updateProductPrice(id, request.price());
+        return new ResponseEntity<>(product, HttpStatus.ACCEPTED);
+    }
+
+    @PatchMapping("/{id}/category")
+    public ResponseEntity<Product> updateProductCategory(@PathVariable(name = "id") UUID id,
+                                                         @Valid @RequestBody UpdateProductCategoryDto request) throws BadRequestException {
+        Product product = productService.updateProductCategory(id, request.categoryId());
         return new ResponseEntity<>(product, HttpStatus.ACCEPTED);
     }
 }

@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.ecommerce.catalog.app.BrandService;
 import com.example.ecommerce.catalog.domain.Brand;
-import com.example.ecommerce.catalog.web.dto.brand.CreateBrandRequestDto;
-import com.example.ecommerce.catalog.web.dto.brand.UpdateBrandRequestDto;
+import com.example.ecommerce.catalog.dto.brand.CreateBrandRequestDto;
+import com.example.ecommerce.catalog.dto.brand.UpdateBrandRequestDto;
 
 @RestController
 @RequestMapping("/brand")

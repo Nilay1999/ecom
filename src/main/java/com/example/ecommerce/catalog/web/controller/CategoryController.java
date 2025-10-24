@@ -1,22 +1,21 @@
 package com.example.ecommerce.catalog.web.controller;
 
-import com.example.ecommerce.catalog.app.CategoryService;
-import com.example.ecommerce.catalog.domain.Category;
-import com.example.ecommerce.catalog.web.dto.category.CategoryResponseDto;
-import com.example.ecommerce.catalog.web.dto.category.CreateCategoryRequest;
-import com.example.ecommerce.catalog.web.dto.category.PageResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
+import com.example.ecommerce.catalog.app.CategoryService;
+import com.example.ecommerce.catalog.domain.Category;
+import com.example.ecommerce.catalog.dto.category.CategoryResponseDto;
+import com.example.ecommerce.catalog.dto.category.CreateCategoryRequest;
+import com.example.ecommerce.catalog.dto.category.PageResponseDto;
 
 @RestController
 @RequestMapping("/category")
@@ -31,7 +30,7 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<Category> create(@RequestBody CreateCategoryRequest request) {
         Category category = categoryService.create(request.getCategoryName(), request.getDescription(),
-                                                   request.getParentCategoryId());
+                request.getParentCategoryId());
         return ResponseEntity.ok(category);
     }
 
@@ -83,7 +82,7 @@ public class CategoryController {
     @ApiResponse(responseCode = "200", description = "Successfully retrieved categories", content =
     @Content(mediaType = "application/json", schema = @Schema(implementation = Category.class)))
     public ResponseEntity<Category> upsertCategoryById(@PathVariable(name = "id") UUID id,
-            @RequestBody CreateCategoryRequest request) {
+                                                       @RequestBody CreateCategoryRequest request) {
         return ResponseEntity.ok(categoryService.upsertCategory(id, request));
     }
 }

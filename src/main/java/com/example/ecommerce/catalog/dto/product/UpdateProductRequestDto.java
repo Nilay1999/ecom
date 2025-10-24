@@ -1,4 +1,4 @@
-package com.example.ecommerce.catalog.web.dto.product;
+package com.example.ecommerce.catalog.dto.product;
 
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
