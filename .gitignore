@@ -11,7 +11,7 @@ target/
 *.iws
 *.iml
 *.ipr
-
+*.kiro
 ### Eclipse ###
 .apt_generated
 .classpath
@@ -37,3 +37,11 @@ build/
 ### Mac OS ###
 .DS_Store
 applications.properties
+
+# Local properties files
+application-local.properties
+application-secrets.properties
+application.properties
+# Environment files
+.env
+.env.local
