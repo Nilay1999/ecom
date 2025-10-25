@@ -40,7 +40,7 @@ applications.properties
 
 # Local properties files
 application-local.properties
-application-secrets.properties
+application-prod.properties
 application.properties
 # Environment files
 .env

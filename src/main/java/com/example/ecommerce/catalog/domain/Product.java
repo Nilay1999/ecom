@@ -16,8 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Getter
 @Entity
-@Table(name = "products", indexes = {@Index(name = "idx_product_name", columnList = "productName"), @Index(name =
-        "idx_brand_name", columnList = "brandName")})
+@Table(name = "products", indexes = { @Index(name = "idx_product_name", columnList = "productName") })
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -85,7 +84,7 @@ public class Product {
     private Product(Builder builder) {
         this.productName = builder.productName;
         this.description = builder.description;
-        this.rating = builder.rating != null ? builder.rating:BigDecimal.ZERO;
+        this.rating = builder.rating != null ? builder.rating : BigDecimal.ZERO;
         this.stockQuantity = builder.stockQuantity;
         this.price = builder.price;
         this.weight = builder.weight;

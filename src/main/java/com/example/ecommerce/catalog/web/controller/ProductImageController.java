@@ -1,18 +1,37 @@
 package com.example.ecommerce.catalog.web.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.ecommerce.catalog.app.ProductImageService;
 import com.example.ecommerce.catalog.dto.image.ImageOrderRequestDto;
 import com.example.ecommerce.catalog.dto.image.ProductImageRequestDto;
 import com.example.ecommerce.catalog.dto.image.ProductImageResponseDto;
+import com.example.ecommerce.common.config.S3Service;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("product-images")
@@ -21,6 +40,19 @@ import com.example.ecommerce.catalog.dto.image.ProductImageResponseDto;
 public class ProductImageController {
 
     private final ProductImageService productImageService;
+    private final S3Service s3Service;
+
+    @PostMapping(value = "/upload/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload product image")
+    public ResponseEntity<Map<String, String>> uploadFile(
+            @Parameter(description = "Product ID", required = true) @PathVariable("productId") UUID productId,
+
+            @Parameter(description = "Image file to upload", required = true, schema = @Schema(type = "string", format = "binary")) @RequestPart("file") MultipartFile file)
+            throws IOException {
+
+        Map<String, String> response = s3Service.generateProductImageUploadUrl(file, productId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
     @PostMapping
     @Operation(summary = "Add Image to Product", description = "Add a new image to a product")
