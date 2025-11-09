@@ -1,33 +1,25 @@
 package com.example.ecommerce.catalog.dto.category;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
 import java.util.List;
 
-@Getter
-@Setter
+import org.springframework.data.domain.Page;
+
 @Schema(description = "Paginated response")
-public class PageResponseDto<T> {
-
-    @Schema(description = "List of item in the current page")
-    private List<T> content;
-
-    @Schema(description = "Current page number (0-based)")
-    private int number;
-
-    @Schema(description = "Size of the page")
-    private int size;
-
-    @Schema(description = "Total number of elements")
-    private long totalElements;
-
-    @Schema(description = "Total number of pages")
-    private int totalPages;
-
-    @Schema(description = "True if there is a next page")
-    private boolean hasNext;
-
-    @Schema(description = "True if there is a previous page")
-    private boolean hasPrevious;
+public record PageResponseDto<T>(
+        List<T> content,
+        int page,
+        int size,
+        long totalElements,
+        int totalPages,
+        boolean last) {
+    public static <T> PageResponseDto<T> from(Page<T> page) {
+        return new PageResponseDto<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isLast());
+    }
 }

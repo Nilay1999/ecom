@@ -2,6 +2,8 @@ package com.example.ecommerce.catalog.app;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -9,11 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.ecommerce.catalog.domain.Category;
 import com.example.ecommerce.catalog.dto.category.CategoryResponseDto;
+import com.example.ecommerce.catalog.dto.category.CategoryTreeDto;
 import com.example.ecommerce.catalog.dto.category.CreateCategoryRequest;
 import com.example.ecommerce.catalog.dto.category.PageResponseDto;
 import com.example.ecommerce.catalog.infra.CategoryRepository;
 import com.example.ecommerce.common.exception.category.CategoryNotFoundException;
-import com.example.ecommerce.common.exception.category.DuplicateCategoryException;
 
 @Service
 @Transactional
@@ -38,8 +40,21 @@ public class CategoryService {
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + id));
     }
 
-    public Page<Category> getPaginatedCategoryTree(int page, int size) {
-        return categoryRepo.findCategoriesWithChildren(PageRequest.of(page, Math.min(size, 100)));
+    public PageResponseDto<CategoryTreeDto> getPaginatedCategoryTree(int page, int size) {
+        Page<Category> categoryPage = categoryRepo
+                .findCategoriesWithChildren(PageRequest.of(page, Math.min(size, 100)));
+
+        List<CategoryTreeDto> dtoList = categoryPage.getContent().stream()
+                .map(this::categoryTreeResponse)
+                .toList();
+
+        return new PageResponseDto<>(
+                dtoList,
+                categoryPage.getNumber(),
+                categoryPage.getSize(),
+                categoryPage.getTotalElements(),
+                categoryPage.getTotalPages(),
+                categoryPage.isLast());
     }
 
     public PageResponseDto<CategoryResponseDto> getPaginated(int page, int size) {
@@ -48,16 +63,13 @@ public class CategoryService {
 
         List<CategoryResponseDto> dtoList = categoryPage.getContent().stream().map(this::toDto).toList();
 
-        PageResponseDto<CategoryResponseDto> response = new PageResponseDto<CategoryResponseDto>();
-        response.setContent(dtoList);
-        response.setNumber(categoryPage.getNumber());
-        response.setSize(categoryPage.getSize());
-        response.setTotalElements(categoryPage.getTotalElements());
-        response.setTotalPages(categoryPage.getTotalPages());
-        response.setHasNext(categoryPage.hasNext());
-        response.setHasPrevious(categoryPage.hasPrevious());
-
-        return response;
+        return new PageResponseDto<>(
+                dtoList,
+                categoryPage.getNumber(),
+                categoryPage.getSize(),
+                categoryPage.getTotalElements(),
+                categoryPage.getTotalPages(),
+                categoryPage.isLast());
     }
 
     public Category findBySlug(String slug) {
@@ -65,11 +77,12 @@ public class CategoryService {
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found with slug: " + slug));
     }
 
-    public List<Category> getCategoryTreeByParentId(UUID parentId) {
+    public List<CategoryTreeDto> getCategoryTreeByParentId(UUID parentId) {
         Category parent = categoryRepo.findById(parentId)
                 .orElseThrow(() -> new CategoryNotFoundException("Parent Category not found with id: " + parentId));
 
-        return categoryRepo.findByParent(parent);
+        List<Category> categories = categoryRepo.findByParent(parent);
+        return categories.stream().map(this::categoryTreeResponse).toList();
     }
 
     public Category upsertCategory(UUID id, CreateCategoryRequest request) {
@@ -96,18 +109,10 @@ public class CategoryService {
     private Category saveCategory(String name, String description, Category parent) {
         Category.Builder builder = new Category.Builder().setName(name).setDescription(description);
 
-        if (parent != null) builder.setParent(parent);
+        if (parent != null)
+            builder.setParent(parent);
 
         return categoryRepo.save(builder.build());
-    }
-
-    private void validateCategoryData(String name, String slug) {
-        if (categoryRepo.existsByName(name)) {
-            throw new DuplicateCategoryException("A category with name '" + name + "' already exists");
-        }
-        if (categoryRepo.existsBySlug(slug)) {
-            throw new DuplicateCategoryException("A category with slug '" + slug + "' already exists");
-        }
     }
 
     private CategoryResponseDto toDto(Category category) {
@@ -119,6 +124,31 @@ public class CategoryService {
         dto.setCreatedAt(category.getCreatedAt());
         dto.setUpdatedAt(category.getUpdatedAt());
         dto.setRootCategory(category.isRootCategory());
+        return dto;
+    }
+
+    private CategoryTreeDto categoryTreeResponse(Category category) {
+        CategoryTreeDto dto = new CategoryTreeDto();
+        dto.setId(category.getId());
+        dto.setName(category.getName());
+        dto.setDescription(category.getDescription());
+        dto.setSlug(category.getSlug());
+        dto.setCreatedAt(category.getCreatedAt());
+        dto.setUpdatedAt(category.getUpdatedAt());
+        dto.setRootCategory(category.isRootCategory());
+
+        // Recursively convert subcategories
+        // List<CategoryTreeDto> subCategoryDtos = category.getSubCategories().stream()
+        // .map(this::categoryTreeResponse)
+        // .toList();
+        // dto.setSubCategories(subCategoryDtos);
+        if (category.getSubCategories() != null && !category.getSubCategories().isEmpty()) {
+            dto.setSubCategories(
+                    category.getSubCategories().stream()
+                            .map(this::categoryTreeResponse)
+                            .collect(Collectors.toList()));
+        }
+
         return dto;
     }
 }

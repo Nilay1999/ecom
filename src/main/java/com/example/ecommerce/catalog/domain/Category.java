@@ -16,9 +16,11 @@ import java.util.UUID;
 @Table(name = "categories")
 public class Category {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private final List<Category> subCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
+    @JsonIgnore
     private final List<Product> products = new ArrayList<>();
 
     @Id

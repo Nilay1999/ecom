@@ -263,6 +263,7 @@ public class Product {
             return this;
         }
 
+        @SuppressWarnings("unused")
         private void validate() {
             if (productName == null || productName.trim().isEmpty()) {
                 throw new IllegalStateException("Product name is required");

@@ -33,24 +33,24 @@ public class ProductService {
     private final BrandRepository brandRepository;
 
     public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository,
-                          BrandRepository brandRepository) {
+            BrandRepository brandRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
     }
 
     public CreateProductResponseDto createProduct(String productName,
-                                                  String description,
-                                                  BigDecimal price,
-                                                  UUID brandId,
-                                                  UUID categoryId,
-                                                  String sku,
-                                                  BigDecimal rating,
-                                                  Product.Status status,
-                                                  String size,
-                                                  String color,
-                                                  long stockQuantity,
-                                                  BigDecimal weight) {
+            String description,
+            BigDecimal price,
+            UUID brandId,
+            UUID categoryId,
+            String sku,
+            BigDecimal rating,
+            Product.Status status,
+            String size,
+            String color,
+            long stockQuantity,
+            BigDecimal weight) {
         Brand brand = brandRepository.findById(brandId)
                 .orElseThrow(() -> new EntityNotFoundException("Brand not found: " + brandId));
 
@@ -150,7 +150,7 @@ public class ProductService {
     }
 
     public PageResponseDto<SearchProductResponseDto> searchProducts(String searchQuery, boolean inStock, int page,
-                                                                    int limit, String sort) {
+            int limit, String sort) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by(sort));
         Specification<Product> spec = Specification.where(null);
 
@@ -163,15 +163,13 @@ public class ProductService {
         Page<Product> productPage = productRepository.findAll(spec, pageable);
         List<SearchProductResponseDto> dtoList = productPage.getContent().stream().map(this::toDto).toList();
 
-        PageResponseDto<SearchProductResponseDto> response = new PageResponseDto<>();
-        response.setContent(dtoList);
-        response.setNumber(productPage.getNumber());
-        response.setSize(productPage.getSize());
-        response.setTotalElements(productPage.getTotalElements());
-        response.setTotalPages(productPage.getTotalPages());
-        response.setHasNext(productPage.hasNext());
-        response.setHasPrevious(productPage.hasPrevious());
-        return response;
+        return new PageResponseDto<>(
+                dtoList,
+                productPage.getNumber(),
+                productPage.getSize(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.isLast());
     }
 
     // -------------------- private helpers --------------------
