@@ -2,12 +2,14 @@ package com.example.ecommerce.catalog.web.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.ecommerce.catalog.app.BrandService;
 import com.example.ecommerce.catalog.domain.Brand;
+import com.example.ecommerce.catalog.domain.Product;
 import com.example.ecommerce.catalog.dto.brand.CreateBrandRequestDto;
 import com.example.ecommerce.catalog.dto.brand.UpdateBrandRequestDto;
 
@@ -29,8 +31,13 @@ public class BrandController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Brand> getCategoryById(@PathVariable UUID id) {
+    public ResponseEntity<Brand> getBrandById(@PathVariable UUID id) {
         return ResponseEntity.ok(brandService.getBrandById(id));
+    }
+
+    @GetMapping("/{id}/product")
+    public ResponseEntity<List<Product>> getProductsByBrand(@PathVariable UUID id) {
+        return ResponseEntity.ok(brandService.getProductsByBrand(id));
     }
 
     @PostMapping
