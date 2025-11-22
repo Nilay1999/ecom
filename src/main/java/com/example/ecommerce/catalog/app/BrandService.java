@@ -1,5 +1,11 @@
 package com.example.ecommerce.catalog.app;
 
+import com.example.ecommerce.catalog.domain.Brand;
+import com.example.ecommerce.catalog.domain.Product;
+import com.example.ecommerce.catalog.dto.category.PageResponseDto;
+import com.example.ecommerce.catalog.infra.BrandRepository;
+import com.example.ecommerce.catalog.infra.ProductRepository;
+import com.example.ecommerce.common.util.SlugGenerator;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -7,11 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.ecommerce.catalog.domain.Brand;
-import com.example.ecommerce.catalog.domain.Product;
-import com.example.ecommerce.catalog.infra.BrandRepository;
-import com.example.ecommerce.catalog.infra.ProductRepository;
-import com.example.ecommerce.common.util.SlugGenerator;
 
 @Service
 @Transactional
@@ -25,17 +26,28 @@ public class BrandService {
     }
 
     public Brand getBrandById(UUID id) {
-        return brandRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Brand not found"));
+        return brandRepository
+                .findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Brand not found"));
     }
 
     public List<Product> getProductsByBrand(UUID id) {
-        Brand brand = brandRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Brand not found"));
+        Brand brand = brandRepository
+                .findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Brand not found"));
         return productRepository.findByBrand(brand);
     }
 
-    public Page<Brand> getPaginated(int page, int size) {
+    public PageResponseDto<Brand> getPaginated(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return brandRepository.findAll(pageable);
+        Page<Brand> brandPage = brandRepository.findAll(pageable);
+        return new PageResponseDto<>(
+                brandPage.getContent(),
+                brandPage.getNumber(),
+                brandPage.getSize(),
+                brandPage.getTotalElements(),
+                brandPage.getTotalPages(),
+                brandPage.isLast());
     }
 
     public Brand createBrand(String name, String description, String logoUrl, Boolean active) {
@@ -44,8 +56,11 @@ public class BrandService {
         return brandRepository.save(brandBuilder.build());
     }
 
-    public Brand updateBrand(UUID brandId, String name, String description, String logoUrl, Boolean active) {
-        Brand brand = brandRepository.findById(brandId).orElseThrow(() -> new RuntimeException("Brand not found"));
+    public Brand updateBrand(
+            UUID brandId, String name, String description, String logoUrl, Boolean active) {
+        Brand brand = brandRepository
+                .findById(brandId)
+                .orElseThrow(() -> new RuntimeException("Brand not found"));
         if (name != null && !name.isBlank()) {
             brand.setName(name);
         }
@@ -63,13 +78,17 @@ public class BrandService {
     }
 
     public Brand updateBrand(UUID brandId, Boolean active) {
-        Brand brand = brandRepository.findById(brandId).orElseThrow(() -> new RuntimeException("Brand not found"));
+        Brand brand = brandRepository
+                .findById(brandId)
+                .orElseThrow(() -> new RuntimeException("Brand not found"));
         brand.setActive(active);
         return brandRepository.save(brand);
     }
 
     public Boolean deleteBrand(UUID id) {
-        Brand brand = brandRepository.findById(id).orElseThrow(() -> new RuntimeException("Brand not found"));
+        Brand brand = brandRepository
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("Brand not found"));
         brandRepository.delete(brand);
         return true;
     }

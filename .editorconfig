@@ -7,27 +7,7 @@ insert_final_newline = true
 indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
-max_line_length = 120
 
 [*.java]
 indent_style = space
-indent_size = 4
-continuation_indent_size = 8
-ij_java_space_around_operators = true
-
-# --- Parameters & Record components ---
-ij_java_method_parameters_wrap = on_every_item
-ij_java_record_components_wrap = on_every_item
-
-# --- Annotations ---
-ij_java_annotation_wrap = on_every_item
-ij_java_annotation_new_line_after_type = true
-
-# --- Method calls ---
-ij_java_call_parameters_wrap = on_every_item
-ij_java_method_call_chain_wrap = normal
-
-# --- Imports ---
-ij_java_imports_layout = *, javax.**, java.**, org.springframework.**, org.**, com.**
-ij_java_imports_count_to_use_star_import = 999
-ij_java_imports_count_to_use_static_star_import = 999
+indent_size = 2

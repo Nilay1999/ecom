@@ -39,7 +39,6 @@ build/
 applications.properties
 
 # Local properties files
-application-local.properties
 application-prod.properties
 application.properties
 # Environment files
