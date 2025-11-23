@@ -1,7 +1,8 @@
 package com.example.ecommerce.catalog.domain;
 
 import com.example.ecommerce.common.util.SlugGenerator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -16,11 +17,11 @@ import java.util.UUID;
 @Table(name = "categories")
 public class Category {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+    @JsonManagedReference
     private final List<Category> subCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
-    @JsonIgnore
+    @JsonManagedReference
     private final List<Product> products = new ArrayList<>();
 
     @Id
@@ -36,7 +37,7 @@ public class Category {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "parent_id")
-    @JsonIgnore
+    @JsonBackReference
     private Category parent;
 
     @Column(length = 200, unique = true, nullable = false)

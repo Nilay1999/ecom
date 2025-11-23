@@ -4,10 +4,37 @@ root = true
 charset = utf-8
 end_of_line = lf
 insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+
+# Default indentation (use spaces for Java projects)
 indent_style = space
 indent_size = 4
-trim_trailing_whitespace = true
 
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.{xml,html,js,ts,css,scss}]
+indent_size = 2
+
+# Java-specific rules
 [*.java]
 indent_style = space
 indent_size = 2
+continuation_indent_size = 4
+max_line_length = 120
+insert_final_newline = true
+trim_trailing_whitespace = true
+# Ensure files start with ascii BOM off
+charset = utf-8
+
+# Gradle / shell / properties
+[*.gradle]
+indent_size = 2
+
+[*.{properties,env}]
+charset = utf-8
+trim_trailing_whitespace = false

@@ -1,7 +1,7 @@
 package com.example.ecommerce.catalog.dto.brand;
 
-import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Size;
 
-public record UpdateBrandRequestDto(@Max(50) String name, @Max(400) String description, String logoUrl,
-                                    Boolean active) {
+public record UpdateBrandRequestDto(@Size(max = 50) String name, @Size(max = 400) String description, String logoUrl,
+        Boolean active) {
 }

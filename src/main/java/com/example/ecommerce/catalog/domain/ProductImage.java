@@ -1,6 +1,6 @@
 package com.example.ecommerce.catalog.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -23,7 +23,7 @@ public class ProductImage {
     @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
-    @JsonIgnore
+    @JsonBackReference
     private Product product;
 
     @NotBlank
@@ -161,8 +161,7 @@ public class ProductImage {
         updatedAt = LocalDateTime.now();
         // Auto-generate alt text if not provided
         if (this.altText == null || this.altText.trim().isEmpty()) {
-            this.altText = this.product != null ?
-                    this.product.getProductName() + " image" : "Product image";
+            this.altText = this.product != null ? this.product.getProductName() + " image" : "Product image";
         }
     }
 
@@ -232,7 +231,7 @@ public class ProductImage {
 
         public ProductImage build() {
             return new ProductImage(imageUrl, isPrimary, product, displayOrder,
-                                    altText, imageType, fileSize, mimeType, width, height);
+                    altText, imageType, fileSize, mimeType, width, height);
         }
     }
 }

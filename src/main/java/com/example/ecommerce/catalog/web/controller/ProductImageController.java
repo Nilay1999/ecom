@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.ecommerce.catalog.app.ProductImageService;
+import com.example.ecommerce.catalog.dto.common.ApiResponse;
 import com.example.ecommerce.catalog.dto.image.ImageOrderRequestDto;
 import com.example.ecommerce.catalog.dto.image.ProductImageRequestDto;
 import com.example.ecommerce.catalog.dto.image.ProductImageResponseDto;
@@ -44,59 +45,62 @@ public class ProductImageController {
 
     @PostMapping(value = "/upload/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload product image")
-    public ResponseEntity<Map<String, String>> uploadFile(
+    public ResponseEntity<ApiResponse<Map<String, String>>> uploadFile(
             @Parameter(description = "Product ID", required = true) @PathVariable("productId") UUID productId,
 
             @Parameter(description = "Image file to upload", required = true, schema = @Schema(type = "string", format = "binary")) @RequestPart("file") MultipartFile file)
             throws IOException {
 
         Map<String, String> response = s3Service.generateProductImageUploadUrl(file, productId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created("Image uploaded successfully", response));
     }
 
     @PostMapping
     @Operation(summary = "Add Image to Product", description = "Add a new image to a product")
-    public ResponseEntity<ProductImageResponseDto> addImageToProduct(
+    public ResponseEntity<ApiResponse<ProductImageResponseDto>> addImageToProduct(
             @Valid @RequestBody ProductImageRequestDto request) {
 
         ProductImageResponseDto createdImage = productImageService.addImageToProduct(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdImage);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created("Image added to product successfully", createdImage));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get Product Images", description = "Retrieve all images for a specific product")
-    public ResponseEntity<List<ProductImageResponseDto>> getProductImages(@PathVariable("productId") UUID id) {
+    public ResponseEntity<ApiResponse<List<ProductImageResponseDto>>> getProductImages(
+            @PathVariable("productId") UUID id) {
         List<ProductImageResponseDto> images = productImageService.getProductImages(id);
-        return ResponseEntity.ok(images);
+        return ResponseEntity.ok(ApiResponse.success("Product images retrieved successfully", images));
     }
 
     @PatchMapping("/{imageId}/primary")
     @Operation(summary = "Set Primary Image", description = "Mark an image as primary for the product")
-    public ResponseEntity<List<ProductImageResponseDto>> setPrimaryImage(
+    public ResponseEntity<ApiResponse<List<ProductImageResponseDto>>> setPrimaryImage(
             @PathVariable("productId") UUID productId,
             @PathVariable("imageId") UUID imageId) {
 
         List<ProductImageResponseDto> updatedImages = productImageService.setPrimaryImage(productId, imageId);
-        return ResponseEntity.ok(updatedImages);
+        return ResponseEntity.ok(ApiResponse.accepted("Primary image set successfully", updatedImages));
     }
 
     @PutMapping("/order")
     @Operation(summary = "Reorder Images", description = "Update the display order of multiple images")
-    public ResponseEntity<List<ProductImageResponseDto>> reorderImages(
+    public ResponseEntity<ApiResponse<List<ProductImageResponseDto>>> reorderImages(
             @PathVariable("productId") UUID productId,
             @Valid @RequestBody ImageOrderRequestDto request) {
 
         List<ProductImageResponseDto> updatedImages = productImageService.reorderImages(productId, request);
-        return ResponseEntity.ok(updatedImages);
+        return ResponseEntity.ok(ApiResponse.accepted("Images reordered successfully", updatedImages));
     }
 
     @DeleteMapping("/{imageId}")
     @Operation(summary = "Delete Product Image", description = "Delete a specific product image")
-    public ResponseEntity<Void> deleteProductImage(
+    public ResponseEntity<ApiResponse<Void>> deleteProductImage(
             @PathVariable("productId") UUID productId,
             @PathVariable("imageId") UUID imageId) {
 
         productImageService.deleteProductImage(productId, imageId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Product image deleted successfully", null));
     }
 }

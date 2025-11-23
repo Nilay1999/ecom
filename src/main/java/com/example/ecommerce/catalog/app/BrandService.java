@@ -2,47 +2,58 @@ package com.example.ecommerce.catalog.app;
 
 import com.example.ecommerce.catalog.domain.Brand;
 import com.example.ecommerce.catalog.domain.Product;
+import com.example.ecommerce.catalog.dto.brand.BrandResponseDto;
+import com.example.ecommerce.catalog.dto.brand.PaginatedBrandsResponseDto;
 import com.example.ecommerce.catalog.dto.category.PageResponseDto;
 import com.example.ecommerce.catalog.infra.BrandRepository;
-import com.example.ecommerce.catalog.infra.ProductRepository;
 import com.example.ecommerce.common.util.SlugGenerator;
-import java.util.List;
-import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 @Transactional
 public class BrandService {
     private final BrandRepository brandRepository;
-    private final ProductRepository productRepository;
 
-    public BrandService(BrandRepository brandRepository, ProductRepository productRepository) {
+    public BrandService(BrandRepository brandRepository) {
         this.brandRepository = brandRepository;
-        this.productRepository = productRepository;
     }
 
-    public Brand getBrandById(UUID id) {
-        return brandRepository
+    public BrandResponseDto getBrandById(UUID id) {
+        Brand brand = brandRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Brand not found"));
+        return new BrandResponseDto(
+                brand.getId(),
+                brand.getName(),
+                brand.getDescription(),
+                brand.getLogoUrl(),
+                brand.getSlug(),
+                brand.isActive(),
+                brand.getCreatedAt(),
+                brand.getUpdatedAt());
     }
 
     public List<Product> getProductsByBrand(UUID id) {
         Brand brand = brandRepository
-                .findById(id)
+                .findByIdWithProducts(id)
                 .orElseThrow(() -> new IllegalArgumentException("Brand not found"));
-        return productRepository.findByBrand(brand);
+        return brand.getProducts();
     }
 
-    public PageResponseDto<Brand> getPaginated(int page, int size) {
+    public PageResponseDto<PaginatedBrandsResponseDto> getPaginated(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Brand> brandPage = brandRepository.findAll(pageable);
+        List<PaginatedBrandsResponseDto> brandList = brandPage.getContent().stream().map(this::paginatedBrandsDtoMapper)
+                .toList();
         return new PageResponseDto<>(
-                brandPage.getContent(),
+                brandList,
                 brandPage.getNumber(),
                 brandPage.getSize(),
                 brandPage.getTotalElements(),
@@ -91,5 +102,10 @@ public class BrandService {
                 .orElseThrow(() -> new RuntimeException("Brand not found"));
         brandRepository.delete(brand);
         return true;
+    }
+
+    private PaginatedBrandsResponseDto paginatedBrandsDtoMapper(Brand brand) {
+        return new PaginatedBrandsResponseDto(brand.getId(), brand.getName(), brand.getDescription(),
+                brand.getLogoUrl(), brand.getCreatedAt(), brand.getUpdatedAt());
     }
 }

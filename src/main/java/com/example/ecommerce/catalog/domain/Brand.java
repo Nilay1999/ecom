@@ -1,5 +1,6 @@
 package com.example.ecommerce.catalog.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -15,7 +16,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "brands")
 public class Brand {
-    @OneToMany(mappedBy = "brand", cascade = CascadeType.PERSIST)
+
+    @OneToMany(mappedBy = "brand", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private final List<Product> products = new ArrayList<>();
 
     @Id

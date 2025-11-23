@@ -3,24 +3,21 @@ package com.example.ecommerce.catalog.web.controller;
 import com.example.ecommerce.catalog.app.BrandService;
 import com.example.ecommerce.catalog.domain.Brand;
 import com.example.ecommerce.catalog.domain.Product;
+import com.example.ecommerce.catalog.dto.brand.BrandResponseDto;
 import com.example.ecommerce.catalog.dto.brand.CreateBrandRequestDto;
+import com.example.ecommerce.catalog.dto.brand.PaginatedBrandsResponseDto;
 import com.example.ecommerce.catalog.dto.brand.UpdateBrandRequestDto;
+import com.example.ecommerce.catalog.dto.brand.UpdateBrandStatusRequestDto;
 import com.example.ecommerce.catalog.dto.category.PageResponseDto;
+import com.example.ecommerce.catalog.dto.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.UUID;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/brand")
@@ -33,54 +30,55 @@ public class BrandController {
     }
 
     @GetMapping
-    public ResponseEntity<PageResponseDto<Brand>> getPaginatedBrands(
-            @Parameter(description = "Page number (0-based)", example = "0")
-                    @RequestParam(defaultValue = "0", name = "page")
-                    int page,
-            @Parameter(description = "Page size (max 100)", example = "5")
-                    @RequestParam(defaultValue = "5", name = "size")
-                    int size) {
-        return ResponseEntity.ok(brandService.getPaginated(page, size));
+    public ResponseEntity<ApiResponse<PageResponseDto<PaginatedBrandsResponseDto>>> getPaginatedBrands(
+            @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0", name = "page") int page,
+            @Parameter(description = "Page size (max 100)", example = "5") @RequestParam(defaultValue = "5", name = "size") int size) {
+        PageResponseDto<PaginatedBrandsResponseDto> brands = brandService.getPaginated(page, size);
+        return ResponseEntity.ok(ApiResponse.success("Brands fetched successfully", brands));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Brand> getBrandById(@PathVariable(name = "id") UUID id) {
-        return ResponseEntity.ok(brandService.getBrandById(id));
+    public ResponseEntity<ApiResponse<BrandResponseDto>> getBrandById(
+            @PathVariable(name = "id") UUID id) {
+        com.example.ecommerce.catalog.dto.brand.BrandResponseDto brand = brandService.getBrandById(id);
+        return ResponseEntity.ok(ApiResponse.success("Brand retrieved successfully", brand));
     }
 
     @GetMapping("/{id}/product")
-    public ResponseEntity<List<Product>> getProductsByBrand(@PathVariable(name = "id") UUID id) {
-        return ResponseEntity.ok(brandService.getProductsByBrand(id));
+    public ResponseEntity<ApiResponse<List<Product>>> getProductsByBrand(@PathVariable(name = "id") UUID id) {
+        List<Product> products = brandService.getProductsByBrand(id);
+        return ResponseEntity.ok(ApiResponse.success("Products retrieved successfully", products));
     }
 
     @PostMapping
-    public ResponseEntity<Brand> createBrand(@Valid @RequestBody CreateBrandRequestDto request) {
-        Brand brand =
-                brandService.createBrand(
-                        request.name(), request.description(), request.logoUrl(), request.active());
-        return ResponseEntity.ok(brand);
+    public ResponseEntity<ApiResponse<Brand>> createBrand(@Valid @RequestBody CreateBrandRequestDto request) {
+        Brand brand = brandService.createBrand(
+                request.name(), request.description(), request.logoUrl(), request.active());
+        return ResponseEntity.ok(ApiResponse.created("Brand created successfully", brand));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Brand> updateBrand(
+    public ResponseEntity<ApiResponse<Brand>> updateBrand(
             @PathVariable(name = "id") UUID id, @Valid @RequestBody UpdateBrandRequestDto request) {
-        return ResponseEntity.ok(
-                brandService.updateBrand(
-                        id,
-                        request.name(),
-                        request.description(),
-                        request.logoUrl(),
-                        request.active()));
+        Brand brand = brandService.updateBrand(
+                id,
+                request.name(),
+                request.description(),
+                request.logoUrl(),
+                request.active());
+        return ResponseEntity.ok(ApiResponse.accepted("Brand updated successfully", brand));
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Brand> toggleBrandStatus(
-            @PathVariable(name = "id") UUID id, @RequestBody UpdateBrandRequestDto request) {
-        return ResponseEntity.ok(brandService.updateBrand(id, request.active()));
+    public ResponseEntity<ApiResponse<Brand>> toggleBrandStatus(
+            @PathVariable(name = "id") UUID id, @RequestBody UpdateBrandStatusRequestDto request) {
+        Brand brand = brandService.updateBrand(id, request.active());
+        return ResponseEntity.ok(ApiResponse.accepted("Brand status updated successfully", brand));
     }
 
-    @DeleteMapping
-    public ResponseEntity<Boolean> deleteCategoryById(@PathVariable(name = "id") UUID id) {
-        return ResponseEntity.ok(brandService.deleteBrand(id));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Boolean>> deleteCategoryById(@PathVariable(name = "id") UUID id) {
+        Boolean deleted = brandService.deleteBrand(id);
+        return ResponseEntity.ok(ApiResponse.success("Brand deleted successfully", deleted));
     }
 }
